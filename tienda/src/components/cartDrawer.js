@@ -1,6 +1,7 @@
 import { getCart, removeFromCart, updateQuantity, clearCart, getCartTotal, getCartCount, onCartChange } from '../utils/cart.js';
 import { formatPrice, formatCategory } from '../utils/format.js';
 import { showToast } from '../utils/toast.js';
+import { openCheckoutModal } from './checkoutModal.js';
 
 let drawerElement = null;
 let isOpen = false;
@@ -419,26 +420,20 @@ function renderCartContents() {
 }
 
 /**
- * Simula el proceso de compra/checkout mostrando modal o confirmación amigable.
+ * Inicia el proceso de checkout abriendo el formulario de pedido.
  */
 function handleCheckout() {
-  const total = getCartTotal();
   const count = getCartCount();
-
-  const confirmed = confirm(
-    `¡Confirmación de Compra!\n\nEstás por realizar un pedido de ${count} artículos por un total de ${formatPrice(total)}.\n\n¿Deseas confirmar la orden?`
-  );
-
-  if (confirmed) {
-    clearCart();
-    closeCart();
+  if (count === 0) {
     showToast({
-      title: '¡Compra confirmada con éxito!',
-      message: `Tu pedido por ${formatPrice(total)} fue procesado. ¡Gracias por confiar en TiendaPC!`,
-      type: 'success',
-      duration: 5000
+      title: 'Carrito vacío',
+      message: 'Tu carrito no tiene artículos para procesar.',
+      type: 'warning'
     });
+    return;
   }
+
+  openCheckoutModal();
 }
 
 /**

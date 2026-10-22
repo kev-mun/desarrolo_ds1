@@ -1,6 +1,7 @@
 import { getCart, removeFromCart, updateQuantity, clearCart, getCartTotal, getCartCount, onCartChange } from '../utils/cart.js';
 import { formatPrice, formatCategory } from '../utils/format.js';
 import { showToast } from '../utils/toast.js';
+import { openCheckoutModal } from '../components/checkoutModal.js';
 
 /**
  * Renderiza la página completa de Carrito (#/carrito o #/cart).
@@ -334,19 +335,7 @@ function renderContent(container) {
     <span>Finalizar Pedido (${formatPrice(totalPrice)})</span>
   `;
   checkoutBtn.addEventListener('click', () => {
-    const confirmed = confirm(
-      `¡Confirmación de Compra!\n\nEstás por realizar un pedido de ${totalCount} artículos por un total de ${formatPrice(totalPrice)}.\n\n¿Deseas confirmar la orden?`
-    );
-
-    if (confirmed) {
-      clearCart();
-      showToast({
-        title: '¡Compra confirmada con éxito!',
-        message: `Tu pedido por ${formatPrice(totalPrice)} fue recibido. ¡Gracias por confiar en TiendaPC!`,
-        type: 'success',
-        duration: 5000
-      });
-    }
+    openCheckoutModal();
   });
 
   summaryCard.appendChild(checkoutBtn);

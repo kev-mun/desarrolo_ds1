@@ -2,6 +2,7 @@ import './styles/main.css';
 import { createHeader } from './components/header.js';
 import { createFooter } from './components/footer.js';
 import { createCartDrawer } from './components/cartDrawer.js';
+import { getCheckoutModalElement } from './components/checkoutModal.js';
 import { renderCatalogPage } from './pages/catalog.js';
 import { renderProductDetailPage } from './pages/productDetail.js';
 import { renderCartPage } from './pages/cartPage.js';
@@ -36,6 +37,9 @@ function initApp() {
   // 4. Modal / Drawer global del carrito
   const cartDrawer = createCartDrawer();
   app.appendChild(cartDrawer);
+
+  // 5. Modal de Checkout
+  getCheckoutModalElement();
 
   // 5. Inicializar Router por Hash
   initRouter((location) => {
