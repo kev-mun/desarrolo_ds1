@@ -1,3 +1,6 @@
+import { getCartCount, onCartChange } from '../utils/cart.js';
+import { openCart } from './cartDrawer.js';
+
 /**
  * Componente Header para TiendaPC
  * @returns {HTMLElement}
@@ -41,12 +44,13 @@ export function createHeader() {
   catalogLink.className = 'site-nav__link active';
   catalogLink.textContent = 'Catálogo';
 
-  // Botón Carrito (Deshabilitado / Próximamente)
+  // Botón Carrito interactivo
   const cartButton = document.createElement('button');
   cartButton.type = 'button';
   cartButton.className = 'cart-button';
+  cartButton.id = 'header-cart-btn';
   cartButton.setAttribute('aria-label', 'Carrito de compras, 0 productos');
-  cartButton.title = 'Carrito de compras (Próximamente)';
+  cartButton.title = 'Abrir carrito de compras';
   cartButton.innerHTML = `
     <svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
       <circle cx="9" cy="21" r="1"></circle>
@@ -54,8 +58,28 @@ export function createHeader() {
       <path d="M1 1h4l2.68 13.39a2 2 0 0 0 2 1.61h9.72a2 2 0 0 0 2-1.61L23 6H6"></path>
     </svg>
     <span class="cart-button__label">Carrito</span>
-    <span class="cart-button__badge" aria-hidden="true">0</span>
+    <span class="cart-button__badge" id="header-cart-badge" aria-hidden="true">0</span>
   `;
+
+  const badgeEl = cartButton.querySelector('#header-cart-badge');
+
+  // Actualización reactiva del contador
+  onCartChange(() => {
+    const count = getCartCount();
+    if (badgeEl) {
+      badgeEl.textContent = String(count);
+      badgeEl.classList.remove('cart-button__badge--bump');
+      // Forzar reflujo para reiniciar animación
+      void badgeEl.offsetWidth;
+      badgeEl.classList.add('cart-button__badge--bump');
+    }
+    cartButton.setAttribute('aria-label', `Carrito de compras, ${count} ${count === 1 ? 'producto' : 'productos'}`);
+  });
+
+  // Abrir Drawer al hacer clic
+  cartButton.addEventListener('click', () => {
+    openCart();
+  });
 
   nav.appendChild(catalogLink);
   nav.appendChild(cartButton);

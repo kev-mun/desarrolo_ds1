@@ -1,8 +1,10 @@
 import './styles/main.css';
 import { createHeader } from './components/header.js';
 import { createFooter } from './components/footer.js';
+import { createCartDrawer } from './components/cartDrawer.js';
 import { renderCatalogPage } from './pages/catalog.js';
 import { renderProductDetailPage } from './pages/productDetail.js';
+import { renderCartPage } from './pages/cartPage.js';
 import { initRouter } from './utils/router.js';
 
 /**
@@ -31,7 +33,11 @@ function initApp() {
   const footer = createFooter();
   app.appendChild(footer);
 
-  // 4. Inicializar Router por Hash
+  // 4. Modal / Drawer global del carrito
+  const cartDrawer = createCartDrawer();
+  app.appendChild(cartDrawer);
+
+  // 5. Inicializar Router por Hash
   initRouter((location) => {
     // Scroll al inicio en cambio de ruta
     window.scrollTo({ top: 0, behavior: 'instant' });
@@ -43,6 +49,10 @@ function initApp() {
 
       case 'product-detail':
         renderProductDetailPage(main, location.params.id);
+        break;
+
+      case 'cart':
+        renderCartPage(main);
         break;
 
       default:

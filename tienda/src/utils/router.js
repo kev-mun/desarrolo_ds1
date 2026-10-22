@@ -29,6 +29,16 @@ export function parseCurrentLocation() {
     };
   }
 
+  // Coincidencia con #/carrito o #/cart
+  if (normalizedPath === '/carrito' || normalizedPath === '/cart') {
+    return {
+      route: 'cart',
+      path: normalizedPath,
+      params: {},
+      query
+    };
+  }
+
   // Coincidencia con #/ o raíz
   if (normalizedPath === '/' || normalizedPath === '') {
     return {

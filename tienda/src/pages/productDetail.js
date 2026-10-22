@@ -1,5 +1,8 @@
 import { getProductById } from '../api/products.js';
 import { formatPrice, formatCategory } from '../utils/format.js';
+import { addToCart } from '../utils/cart.js';
+import { showToast } from '../utils/toast.js';
+import { openCart } from '../components/cartDrawer.js';
 
 /**
  * Renderiza la vista de detalle del producto (#/producto/:id).
@@ -135,24 +138,134 @@ function renderProductDetails(container, product) {
   desc.className = 'detail-description';
   desc.textContent = product.description || 'Sin descripción detallada para este artículo.';
 
-  // Acciones (Agregar al carrito deshabilitado "Próximamente")
+  // Acciones: Selector de cantidad y Agregar al carrito
   const actions = document.createElement('div');
   actions.className = 'detail-actions';
 
-  const addToCartBtn = document.createElement('button');
-  addToCartBtn.type = 'button';
-  addToCartBtn.className = 'btn btn-primary';
-  addToCartBtn.disabled = true;
-  addToCartBtn.innerHTML = `
-    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
-      <circle cx="9" cy="21" r="1"></circle>
-      <circle cx="20" cy="21" r="1"></circle>
-      <path d="M1 1h4l2.68 13.39a2 2 0 0 0 2 1.61h9.72a2 2 0 0 0 2-1.61L23 6H6"></path>
-    </svg>
-    <span>Agregar al carrito (Próximamente)</span>
-  `;
+  const isOutOfStock = stockCount <= 0;
 
-  actions.appendChild(addToCartBtn);
+  if (isOutOfStock) {
+    const outOfStockBtn = document.createElement('button');
+    outOfStockBtn.type = 'button';
+    outOfStockBtn.className = 'btn btn-secondary';
+    outOfStockBtn.disabled = true;
+    outOfStockBtn.textContent = 'Agotado temporalmente';
+    actions.appendChild(outOfStockBtn);
+  } else {
+    let currentQty = 1;
+
+    // Selector de cantidad
+    const qtySelector = document.createElement('div');
+    qtySelector.className = 'detail-qty-selector';
+
+    const qtyMinus = document.createElement('button');
+    qtyMinus.type = 'button';
+    qtyMinus.className = 'detail-qty-btn';
+    qtyMinus.setAttribute('aria-label', 'Disminuir unidades');
+    qtyMinus.innerHTML = `
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" width="16" height="16">
+        <line x1="5" y1="12" x2="19" y2="12"></line>
+      </svg>
+    `;
+
+    const qtyDisplay = document.createElement('span');
+    qtyDisplay.className = 'detail-qty-display';
+    qtyDisplay.textContent = '1';
+
+    const qtyPlus = document.createElement('button');
+    qtyPlus.type = 'button';
+    qtyPlus.className = 'detail-qty-btn';
+    qtyPlus.setAttribute('aria-label', 'Aumentar unidades');
+    qtyPlus.innerHTML = `
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" width="16" height="16">
+        <line x1="12" y1="5" x2="12" y2="19"></line>
+        <line x1="5" y1="12" x2="19" y2="12"></line>
+      </svg>
+    `;
+
+    qtyMinus.addEventListener('click', () => {
+      if (currentQty > 1) {
+        currentQty -= 1;
+        qtyDisplay.textContent = String(currentQty);
+        qtyPlus.disabled = false;
+      }
+    });
+
+    qtyPlus.addEventListener('click', () => {
+      if (currentQty < stockCount) {
+        currentQty += 1;
+        qtyDisplay.textContent = String(currentQty);
+        if (currentQty >= stockCount) {
+          qtyPlus.disabled = true;
+        }
+      }
+    });
+
+    qtySelector.appendChild(qtyMinus);
+    qtySelector.appendChild(qtyDisplay);
+    qtySelector.appendChild(qtyPlus);
+
+    // Botón Agregar al Carrito
+    const addToCartBtn = document.createElement('button');
+    addToCartBtn.type = 'button';
+    addToCartBtn.className = 'btn btn-primary detail-add-btn';
+    addToCartBtn.innerHTML = `
+      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+        <circle cx="9" cy="21" r="1"></circle>
+        <circle cx="20" cy="21" r="1"></circle>
+        <path d="M1 1h4l2.68 13.39a2 2 0 0 0 2 1.61h9.72a2 2 0 0 0 2-1.61L23 6H6"></path>
+      </svg>
+      <span>Agregar al Carrito</span>
+    `;
+
+    addToCartBtn.addEventListener('click', () => {
+      addToCart(product, currentQty);
+
+      const originalHtml = addToCartBtn.innerHTML;
+      addToCartBtn.classList.add('btn-added-feedback');
+      addToCartBtn.innerHTML = `
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" width="18" height="18">
+          <polyline points="20 6 9 17 4 12"></polyline>
+        </svg>
+        <span>¡Agregado (${currentQty})!</span>
+      `;
+
+      setTimeout(() => {
+        addToCartBtn.innerHTML = originalHtml;
+        addToCartBtn.classList.remove('btn-added-feedback');
+      }, 1500);
+
+      showToast({
+        title: '¡Producto añadido!',
+        message: `${currentQty} ${currentQty === 1 ? 'unidad' : 'unidades'} de "${product.name}" agregadas al carrito.`,
+        type: 'success',
+        action: {
+          label: 'Ver Carrito',
+          onClick: () => openCart()
+        }
+      });
+    });
+
+    // Botón directo "Abrir Carrito"
+    const viewCartBtn = document.createElement('button');
+    viewCartBtn.type = 'button';
+    viewCartBtn.className = 'btn btn-secondary';
+    viewCartBtn.innerHTML = `
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+        <path d="M6 2L3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4z"></path>
+        <line x1="3" y1="6" x2="21" y2="6"></line>
+        <path d="M16 10a4 4 0 0 1-8 0"></path>
+      </svg>
+      <span>Ver Carrito</span>
+    `;
+    viewCartBtn.addEventListener('click', () => {
+      openCart();
+    });
+
+    actions.appendChild(qtySelector);
+    actions.appendChild(addToCartBtn);
+    actions.appendChild(viewCartBtn);
+  }
 
   // 3. Tabla de Especificaciones Técnicas (specs)
   const specsSection = document.createElement('div');
