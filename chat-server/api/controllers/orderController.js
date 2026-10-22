@@ -163,8 +163,76 @@ const getOrderById = async (req, res, next) => {
   }
 };
 
+/**
+ * Actualiza el estado de un pedido (pendiente, completado, cancelado).
+ * PATCH /api/orders/:id/status
+ */
+const updateOrderStatus = async (req, res, next) => {
+  try {
+    const { id } = req.params;
+    const { status } = req.body;
+
+    const validStatuses = ["pendiente", "completado", "cancelado"];
+    if (!status || !validStatuses.includes(status)) {
+      return res.status(400).json({
+        message: `Estado no válido. Opciones permitidas: ${validStatuses.join(", ")}`
+      });
+    }
+
+    let order = null;
+    if (mongoose.isValidObjectId(id)) {
+      order = await Order.findById(id);
+    }
+    if (!order) {
+      order = await Order.findOne({ orderNumber: id });
+    }
+
+    if (!order) {
+      return res.status(404).json({ message: "Pedido no encontrado" });
+    }
+
+    order.status = status;
+    await order.save();
+
+    res.json({
+      message: `Estado del pedido actualizado a '${status}'`,
+      order
+    });
+  } catch (error) {
+    next(error);
+  }
+};
+
+/**
+ * Elimina un pedido del sistema.
+ * DELETE /api/orders/:id
+ */
+const deleteOrder = async (req, res, next) => {
+  try {
+    const { id } = req.params;
+
+    let order = null;
+    if (mongoose.isValidObjectId(id)) {
+      order = await Order.findByIdAndDelete(id);
+    }
+    if (!order) {
+      order = await Order.findOneAndDelete({ orderNumber: id });
+    }
+
+    if (!order) {
+      return res.status(404).json({ message: "Pedido no encontrado" });
+    }
+
+    res.json({ message: "Pedido eliminado correctamente", orderId: id });
+  } catch (error) {
+    next(error);
+  }
+};
+
 module.exports = {
   createOrder,
   getOrders,
-  getOrderById
+  getOrderById,
+  updateOrderStatus,
+  deleteOrder
 };

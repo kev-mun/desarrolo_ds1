@@ -29,6 +29,16 @@ export function parseCurrentLocation() {
     };
   }
 
+  // Coincidencia con #/admin o #/admin/orders
+  if (normalizedPath === '/admin' || normalizedPath === '/admin/orders') {
+    return {
+      route: 'admin',
+      path: normalizedPath,
+      params: {},
+      query
+    };
+  }
+
   // Coincidencia con #/carrito o #/cart
   if (normalizedPath === '/carrito' || normalizedPath === '/cart') {
     return {

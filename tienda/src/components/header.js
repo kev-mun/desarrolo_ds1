@@ -44,6 +44,31 @@ export function createHeader() {
   catalogLink.className = 'site-nav__link active';
   catalogLink.textContent = 'Catálogo';
 
+  const adminLink = document.createElement('a');
+  adminLink.href = '#/admin';
+  adminLink.className = 'site-nav__link site-nav__link--admin';
+  adminLink.title = 'Panel de Administración de Pedidos';
+  adminLink.innerHTML = `
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" width="15" height="15" aria-hidden="true">
+      <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"></path>
+    </svg>
+    <span>Admin</span>
+  `;
+
+  // Sincronizar enlace activo con hash
+  const syncActiveNav = () => {
+    const hash = window.location.hash || '#/';
+    if (hash.startsWith('#/admin')) {
+      adminLink.classList.add('active');
+      catalogLink.classList.remove('active');
+    } else {
+      catalogLink.classList.add('active');
+      adminLink.classList.remove('active');
+    }
+  };
+  window.addEventListener('hashchange', syncActiveNav);
+  syncActiveNav();
+
   // Botón Carrito interactivo
   const cartButton = document.createElement('button');
   cartButton.type = 'button';
@@ -82,6 +107,7 @@ export function createHeader() {
   });
 
   nav.appendChild(catalogLink);
+  nav.appendChild(adminLink);
   nav.appendChild(cartButton);
 
   container.appendChild(logoLink);

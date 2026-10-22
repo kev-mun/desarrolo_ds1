@@ -6,6 +6,7 @@ import { getCheckoutModalElement } from './components/checkoutModal.js';
 import { renderCatalogPage } from './pages/catalog.js';
 import { renderProductDetailPage } from './pages/productDetail.js';
 import { renderCartPage } from './pages/cartPage.js';
+import { renderAdminOrdersPage } from './pages/adminOrders.js';
 import { initRouter } from './utils/router.js';
 
 /**
@@ -57,6 +58,10 @@ function initApp() {
 
       case 'cart':
         renderCartPage(main);
+        break;
+
+      case 'admin':
+        renderAdminOrdersPage(main);
         break;
 
       default:
