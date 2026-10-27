@@ -1,4 +1,4 @@
-﻿{
+{
   "name": "chat-server",
   "version": "1.0.0",
   "description": "",
@@ -6,16 +6,38 @@
   "scripts": {
     "start": "node api/index.js",
     "dev": "node --watch api/index.js",
-    "seed": "node api/seed.js"
+    "seed": "node api/seed.js",
+    "test": "jest --coverage --runInBand",
+    "smoke": "node scripts/smoke-test.js"
+  },
+  "jest": {
+    "testEnvironment": "node",
+    "testTimeout": 60000,
+    "collectCoverageFrom": [
+      "api/controllers/**/*.js",
+      "api/models/**/*.js",
+      "api/middleware/**/*.js",
+      "api/routes/**/*.js"
+    ]
   },
   "keywords": [],
   "author": "",
   "license": "ISC",
   "type": "commonjs",
   "dependencies": {
+    "bcryptjs": "^3.0.3",
     "cors": "^2.8.6",
     "dotenv": "^18.0.5",
     "express": "^5.2.1",
-    "mongoose": "^9.11.3"
+    "express-rate-limit": "^8.7.1",
+    "helmet": "^8.3.0",
+    "jsonwebtoken": "^9.0.3",
+    "mongoose": "^9.11.3",
+    "zod": "^4.6.7"
+  },
+  "devDependencies": {
+    "jest": "^30.5.2",
+    "mongodb-memory-server": "^11.3.0",
+    "supertest": "^7.3.1"
   }
 }

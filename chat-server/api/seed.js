@@ -1,189 +1,289 @@
-﻿const path = require("path");
+const path = require("path");
 require("dotenv").config({ path: path.resolve(__dirname, "../.env") });
 require("dotenv").config();
 
 const mongoose = require("mongoose");
-const Product = require("./models/Product");
+const Usuario = require("./models/Usuario");
+const Coleccion = require("./models/Coleccion");
+const Libro = require("./models/Libro");
+const Ejemplar = require("./models/Ejemplar");
+const Prestamo = require("./models/Prestamo");
 
-const products = [
-  {
-    name: "Lenovo IdeaPad 3 15ITL6",
-    description: "Portátil liviano y eficiente para estudio y trabajo con pantalla Full HD.",
-    price: 1850000,
-    category: "portatiles",
-    brand: "Lenovo",
-    stock: 15,
-    image: "https://placehold.co/600x400?text=Lenovo+IdeaPad+3",
-    specs: {
-      pantalla: "15.6 pulgadas FHD (1920x1080)",
-      procesador: "Intel Core i5-1135G7",
-      ram: "8GB DDR4 3200MHz",
-      almacenamiento: "512GB SSD M.2 NVMe",
-      graficos: "Intel Iris Xe Graphics"
-    },
-    featured: false
-  },
-  {
-    name: "ASUS TUF Gaming F15",
-    description: "Portátil gaming de alto rendimiento con gráficos dedicados y refrigeración avanzada.",
-    price: 3890000,
-    category: "portatiles",
-    brand: "ASUS",
-    stock: 8,
-    image: "https://placehold.co/600x400?text=ASUS+TUF+Gaming+F15",
-    specs: {
-      pantalla: "15.6 pulgadas FHD 144Hz",
-      procesador: "Intel Core i5-11400H",
-      tarjeta_grafica: "NVIDIA GeForce RTX 3050 4GB",
-      ram: "16GB DDR4 3200MHz",
-      almacenamiento: "512GB SSD NVMe PCIe"
-    },
-    featured: true
-  },
-  {
-    name: "AMD Ryzen 5 5600",
-    description: "Procesador de 6 núcleos y 12 hilos con arquitectura Zen 3 ideal para juegos y productividad.",
-    price: 620000,
-    category: "procesadores",
-    brand: "AMD",
-    stock: 20,
-    image: "https://placehold.co/600x400?text=AMD+Ryzen+5+5600",
-    specs: {
-      nucleos: "6",
-      hilos: "12",
-      frecuencia_base: "3.5 GHz",
-      frecuencia_turbo: "4.4 GHz",
-      socket: "AM4",
-      cache: "32MB L3"
-    },
-    featured: false
-  },
-  {
-    name: "Gigabyte GeForce RTX 4060 EAGLE OC 8GB",
-    description: "Tarjeta gráfica con arquitectura NVIDIA Ada Lovelace, DLSS 3 y Ray Tracing de tercera generación.",
-    price: 1690000,
-    category: "tarjetas-graficas",
-    brand: "NVIDIA",
-    stock: 10,
-    image: "https://placehold.co/600x400?text=RTX+4060+8GB",
-    specs: {
-      memoria: "8GB GDDR6",
-      interfaz_memoria: "128-bit",
-      refrigeracion: "Windforce 3X con ventiladores alternos",
-      salidas: "2x HDMI 2.1a, 2x DisplayPort 1.4a",
-      consumo: "115W"
-    },
-    featured: true
-  },
-  {
-    name: "Kingston FURY Beast DDR4 16GB (2x8GB) 3200MHz",
-    description: "Memoria RAM de alto rendimiento con disipador de calor de bajo perfil y soporte Intel XMP.",
-    price: 195000,
-    category: "memoria-ram",
-    brand: "Kingston",
-    stock: 35,
-    image: "https://placehold.co/600x400?text=Kingston+Fury+16GB+DDR4",
-    specs: {
-      capacidad: "16GB (Kit 2x8GB)",
-      tipo: "DDR4",
-      velocidad: "3200 MHz",
-      latencia: "CL16",
-      voltaje: "1.35V"
-    },
-    featured: false
-  },
-  {
-    name: "Samsung 980 NVMe M.2 SSD 1TB",
-    description: "Unidad de estado sólido PCIe 3.0 de alta velocidad con tecnología HMB y optimización térmica.",
-    price: 390000,
-    category: "almacenamiento",
-    brand: "Samsung",
-    stock: 25,
-    image: "https://placehold.co/600x400?text=Samsung+980+1TB",
-    specs: {
-      capacidad: "1TB",
-      factor_forma: "M.2 2280",
-      interfaz: "PCIe Gen 3.0 x4, NVMe 1.4",
-      lectura_secuencial: "Hasta 3500 MB/s",
-      escritura_secuencial: "Hasta 3000 MB/s"
-    },
-    featured: false
-  },
-  {
-    name: "LG UltraGear 24GN600-B 24\" 144Hz",
-    description: "Monitor gamer IPS con resolución Full HD, 1ms MBR y tecnología AMD FreeSync Premium.",
-    price: 720000,
-    category: "monitores",
-    brand: "LG",
-    stock: 12,
-    image: "https://placehold.co/600x400?text=LG+UltraGear+24+144Hz",
-    specs: {
-      tamano: "23.8 pulgadas",
-      resolucion: "1920x1080 FHD",
-      tasa_refresco: "144 Hz",
-      tiempo_respuesta: "1ms (GtG)",
-      panel: "IPS con HDR10"
-    },
-    featured: true
-  },
-  {
-    name: "Teclado Mecánico Redragon Kumara K552",
-    description: "Teclado mecánico compacto TKL con switches resistentes al polvo y retroiluminación RGB.",
-    price: 165000,
-    category: "perifericos",
-    brand: "Redragon",
-    stock: 30,
-    image: "https://placehold.co/600x400?text=Redragon+Kumara",
-    specs: {
-      tipo_teclado: "Mecánico",
-      switches: "Outemu Red",
-      formato: "Tenkeyless (87 teclas)",
-      iluminacion: "RGB Chroma configurable",
-      conexion: "Cable USB enmallado"
-    },
-    featured: false
-  },
-  {
-    name: "Mouse Gamer Logitech G203 Lightsync",
-    description: "Mouse gamer clásico con sensor de alta precisión hasta 8000 DPI e iluminación RGB Lightsync.",
-    price: 95000,
-    category: "perifericos",
-    brand: "Logitech",
-    stock: 40,
-    image: "https://placehold.co/600x400?text=Logitech+G203",
-    specs: {
-      sensor: "Óptico 8000 DPI",
-      botones: "6 botones programables",
-      iluminacion: "RGB Lightsync",
-      peso: "85 gramos",
-      conexion: "USB"
-    },
-    featured: false
-  }
-];
-
-const seedProducts = async () => {
+const seedDatabase = async () => {
   try {
-    if (!process.env.MONGODB_URI) {
-      console.error("Error: MONGODB_URI no está definido en el archivo .env");
+    const mongoUri = process.env.MONGODB_URI;
+    if (!mongoUri) {
+      console.error("Error: MONGODB_URI no está definida en las variables de entorno.");
       process.exit(1);
     }
 
-    await mongoose.connect(process.env.MONGODB_URI);
-    console.log("MongoDB conectado para seed");
+    await mongoose.connect(mongoUri);
+    console.log("Conectado a MongoDB para sembrado de datos...\n");
 
-    await Product.deleteMany({});
-    console.log("Productos existentes eliminados");
+    // Limpieza de colecciones previas
+    await Promise.all([
+      Usuario.deleteMany({}),
+      Coleccion.deleteMany({}),
+      Libro.deleteMany({}),
+      Ejemplar.deleteMany({}),
+      Prestamo.deleteMany({})
+    ]);
 
-    await Product.insertMany(products);
-    console.log("9 productos insertados");
+    console.log("Colecciones limpiadas.");
 
-    await mongoose.disconnect();
+    // 1. Usuarios requeridos
+    const usuariosData = [
+      {
+        nombre: "Administrador Principal",
+        documento: "10000001",
+        correo: "admin@biblioteca.com",
+        password: "Admin12345",
+        rol: "admin",
+        estado: "activo",
+        permisos: ["*"]
+      },
+      {
+        nombre: "Carlos Bibliotecario",
+        documento: "10000002",
+        correo: "bibliotecario@biblioteca.com",
+        password: "Biblio12345",
+        rol: "bibliotecario",
+        estado: "activo",
+        permisos: ["gestionar_libros", "gestionar_ejemplares", "gestionar_prestamos"]
+      },
+      {
+        nombre: "Ana Estudiante",
+        documento: "10000003",
+        correo: "estudiante@biblioteca.com",
+        password: "Est12345",
+        rol: "estudiante",
+        estado: "activo",
+        permisos: []
+      },
+      {
+        nombre: "Prof. Roberto Gómez",
+        documento: "10000004",
+        correo: "profesor@biblioteca.com",
+        password: "Prof12345",
+        rol: "profesor",
+        estado: "activo",
+        permisos: []
+      },
+      {
+        nombre: "Editorial Planeta Colombia",
+        documento: "10000005",
+        correo: "editorial@biblioteca.com",
+        password: "Edit12345",
+        rol: "editorial",
+        estado: "activo",
+        permisos: ["gestionar_libros"]
+      }
+    ];
+
+    for (const u of usuariosData) {
+      const usuario = new Usuario(u);
+      await usuario.save(); // Dispara pre('save') para hashear password con bcrypt
+    }
+    console.log(`✓ ${usuariosData.length} usuarios creados exitosamente.`);
+
+    // 2. Colecciones (4)
+    const coleccionesData = [
+      {
+        nombre: "Literatura Clásica e Hispanoamericana",
+        descripcion: "Obras maestras de la narrativa en lengua española y clásicos universales."
+      },
+      {
+        nombre: "Ciencia Ficción y Fantasía",
+        descripcion: "Grandes novelas especulativas, distopías y mundos futuristas."
+      },
+      {
+        nombre: "Ciencias de la Computación y Software",
+        descripcion: "Textos de referencia sobre programación, arquitectura y algoritmos."
+      },
+      {
+        nombre: "Historia, Ensayo y Filosofía",
+        descripcion: "Obras sobre pensamiento crítico, evolución humana y reflexión social."
+      }
+    ];
+
+    const coleccionesCreadas = await Coleccion.insertMany(coleccionesData);
+    console.log(`✓ ${coleccionesCreadas.length} colecciones creadas.`);
+
+    const cMap = {};
+    coleccionesCreadas.forEach((c) => {
+      cMap[c.nombre] = c._id;
+    });
+
+    // 3. 12 Libros reales en español
+    const librosData = [
+      {
+        titulo: "Cien años de soledad",
+        autor: "Gabriel García Márquez",
+        isbn: "978-84-376-0494-7",
+        editorial: "Sudamericana",
+        anio: 1967,
+        categoria: "Novela",
+        coleccion: cMap["Literatura Clásica e Hispanoamericana"],
+        portada: "https://images.unsplash.com/photo-1544716278-ca5e3f4abd8c?auto=format&fit=crop&w=500&q=80"
+      },
+      {
+        titulo: "Don Quijote de la Mancha",
+        autor: "Miguel de Cervantes",
+        isbn: "978-84-241-1582-1",
+        editorial: "Castalia",
+        anio: 1605,
+        categoria: "Clásico",
+        coleccion: cMap["Literatura Clásica e Hispanoamericana"],
+        portada: "https://images.unsplash.com/photo-1512820790803-83ca734da794?auto=format&fit=crop&w=500&q=80"
+      },
+      {
+        titulo: "Ficciones",
+        autor: "Jorge Luis Borges",
+        isbn: "978-84-206-3312-1",
+        editorial: "Sur",
+        anio: 1944,
+        categoria: "Cuento",
+        coleccion: cMap["Literatura Clásica e Hispanoamericana"],
+        portada: "https://images.unsplash.com/photo-1497633762265-9d179a990aa6?auto=format&fit=crop&w=500&q=80"
+      },
+      {
+        titulo: "La sombra del viento",
+        autor: "Carlos Ruiz Zafón",
+        isbn: "978-84-08-04364-5",
+        editorial: "Planeta",
+        anio: 2001,
+        categoria: "Misterio",
+        coleccion: cMap["Literatura Clásica e Hispanoamericana"],
+        portada: "https://images.unsplash.com/photo-1476275466078-4007374efbbe?auto=format&fit=crop&w=500&q=80"
+      },
+      {
+        titulo: "Fahrenheit 451",
+        autor: "Ray Bradbury",
+        isbn: "978-84-473-2680-8",
+        editorial: "Minotauro",
+        anio: 1953,
+        categoria: "Distopía",
+        coleccion: cMap["Ciencia Ficción y Fantasía"],
+        portada: "https://images.unsplash.com/photo-1507842229452-7b1897d28734?auto=format&fit=crop&w=500&q=80"
+      },
+      {
+        titulo: "Dune",
+        autor: "Frank Herbert",
+        isbn: "978-84-9759-682-4",
+        editorial: "DeBolsillo",
+        anio: 1965,
+        categoria: "Ciencia Ficción",
+        coleccion: cMap["Ciencia Ficción y Fantasía"],
+        portada: "https://images.unsplash.com/photo-1518770660439-4636190af475?auto=format&fit=crop&w=500&q=80"
+      },
+      {
+        titulo: "Neuromante",
+        autor: "William Gibson",
+        isbn: "978-84-450-7409-1",
+        editorial: "Minotauro",
+        anio: 1984,
+        categoria: "Cyberpunk",
+        coleccion: cMap["Ciencia Ficción y Fantasía"],
+        portada: "https://images.unsplash.com/photo-1526374965328-7f61d4dc18c5?auto=format&fit=crop&w=500&q=80"
+      },
+      {
+        titulo: "Estructura e Interpretación de Programas de Computadora",
+        autor: "Harold Abelson & Gerald Jay Sussman",
+        isbn: "978-84-291-5034-6",
+        editorial: "McGraw-Hill",
+        anio: 1996,
+        categoria: "Programación",
+        coleccion: cMap["Ciencias de la Computación y Software"],
+        portada: "https://images.unsplash.com/photo-1515879218367-8466d910aaa4?auto=format&fit=crop&w=500&q=80"
+      },
+      {
+        titulo: "Código Limpio (Clean Code)",
+        autor: "Robert C. Martin",
+        isbn: "978-84-415-3210-6",
+        editorial: "Anaya Multimedia",
+        anio: 2008,
+        categoria: "Ingeniería de Software",
+        coleccion: cMap["Ciencias de la Computación y Software"],
+        portada: "https://images.unsplash.com/photo-1555066931-4365d14bab8c?auto=format&fit=crop&w=500&q=80"
+      },
+      {
+        titulo: "Patrones de Diseño",
+        autor: "Erich Gamma, Richard Helm, Ralph Johnson, John Vlissides",
+        isbn: "978-84-205-3459-6",
+        editorial: "Pearson Educación",
+        anio: 1994,
+        categoria: "Arquitectura de Software",
+        coleccion: cMap["Ciencias de la Computación y Software"],
+        portada: "https://images.unsplash.com/photo-1531482615713-2afd69097998?auto=format&fit=crop&w=500&q=80"
+      },
+      {
+        titulo: "Sapiens: De animales a dioses",
+        autor: "Yuval Noah Harari",
+        isbn: "978-84-9992-421-2",
+        editorial: "Debate",
+        anio: 2014,
+        categoria: "Historia",
+        coleccion: cMap["Historia, Ensayo y Filosofía"],
+        portada: "https://images.unsplash.com/photo-1461360370896-922624d12aa1?auto=format&fit=crop&w=500&q=80"
+      },
+      {
+        titulo: "El laberinto de la soledad",
+        autor: "Octavio Paz",
+        isbn: "978-968-16-1502-4",
+        editorial: "Fondo de Cultura Económica",
+        anio: 1950,
+        categoria: "Ensayo",
+        coleccion: cMap["Historia, Ensayo y Filosofía"],
+        portada: "https://images.unsplash.com/photo-1457369804613-52c61a468e7d?auto=format&fit=crop&w=500&q=80"
+      }
+    ];
+
+    const librosCreados = await Libro.insertMany(librosData);
+    console.log(`✓ ${librosCreados.length} libros creados.`);
+
+    // 4. Ejemplares (2 a 4 por libro)
+    const ejemplaresData = [];
+    const letras = ["A", "B", "C", "D"];
+
+    librosCreados.forEach((libro, idx) => {
+      // Alternar entre 2, 3 y 4 ejemplares
+      const numEjemplares = 2 + (idx % 3); // 2, 3 o 4
+      const numStr = String(idx + 1).padStart(3, "0");
+
+      for (let i = 0; i < numEjemplares; i++) {
+        ejemplaresData.push({
+          libro: libro._id,
+          codigoBarras: `EJ-${numStr}-${letras[i]}`,
+          estado: "disponible",
+          ubicacion: `Pabellón ${(idx % 4) + 1}, Estante ${i + 1}, Pasillo ${(idx % 3) + 1}`
+        });
+      }
+    });
+
+    const ejemplaresCreados = await Ejemplar.insertMany(ejemplaresData);
+    console.log(`✓ ${ejemplaresCreados.length} ejemplares creados.`);
+
+    console.log("\n==========================================================================");
+    console.log("            SISTEMA DE GESTIÓN BIBLIOTECARIA - SEMILLA COMPLETADA         ");
+    console.log("==========================================================================");
+    console.log("Credenciales de prueba generadas:");
+    console.log("--------------------------------------------------------------------------");
+    console.log(" Rol            | Correo                        | Contraseña | Documento ");
+    console.log("--------------------------------------------------------------------------");
+    console.log(" admin          | admin@biblioteca.com          | Admin12345 | 10000001  ");
+    console.log(" bibliotecario  | bibliotecario@biblioteca.com  | Biblio12345| 10000002  ");
+    console.log(" estudiante     | estudiante@biblioteca.com     | Est12345   | 10000003  ");
+    console.log(" profesor       | profesor@biblioteca.com       | Prof12345  | 10000004  ");
+    console.log(" editorial      | editorial@biblioteca.com      | Edit12345  | 10000005  ");
+    console.log("--------------------------------------------------------------------------\n");
+
+    await mongoose.connection.close();
+    console.log("Conexión a MongoDB cerrada. Proceso completado exitosamente.");
     process.exit(0);
   } catch (error) {
-    console.error("Error en seed:", error);
+    console.error("Error al sembrar la base de datos:", error);
     process.exit(1);
   }
 };
 
-seedProducts();
+seedDatabase();
