@@ -33,14 +33,15 @@ const getLibros = async (req, res, next) => {
 
     const filter = {};
 
-    // filtro por categoría (regex escapada)
+        // filtro por categoría (regex escapada)
     if (req.query.categoria) {
-      filter.categoria = new RegExp(req.query.categoria, 'i');
+      const seguro = String(req.query.categoria).replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+      filter.categoria = new RegExp(seguro, 'i');
     }
 
-    // filtro por colección (ObjectId válido)
+    // filtro por colección (en aggregate hay que convertir a ObjectId)
     if (req.query.coleccion && mongoose.isValidObjectId(req.query.coleccion)) {
-      filter.coleccion = req.query.coleccion;
+      filter.coleccion = new mongoose.Types.ObjectId(req.query.coleccion);
     }
 
     // búsqueda libre sobre varios campos
@@ -135,7 +136,7 @@ const createLibro = async (req, res, next) => {
     if (!parse.success) {
       return res.status(400).json({
         message: 'Datos de libro inválidos',
-        errores: parse.error.errors.map(e => e.message)
+        errores: parse.error.issues.map(e => e.message)
       });
     }
     const data = parse.data;
@@ -183,7 +184,7 @@ const updateLibro = async (req, res, next) => {
     if (!parse.success) {
       return res.status(400).json({
         message: 'Datos de libro inválidos',
-        errores: parse.error.errors.map(e => e.message)
+        errores: parse.error.issues.map(e => e.message)
       });
     }
     const data = parse.data;
