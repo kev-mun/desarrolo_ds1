@@ -4,7 +4,7 @@ const Libro = require("../models/Libro");
 const { z } = require("zod");
 
 const coleccionSchema = z.object({
-  nombre: z.string({ required_error: "El nombre es obligatorio" }).min(1, "El nombre es obligatorio").trim(),
+  nombre: z.string({ error: "El nombre es obligatorio" }).min(1, "El nombre es obligatorio").trim(),
   descripcion: z.string().optional().default("")
 });
 
@@ -87,7 +87,7 @@ const createColeccion = async (req, res, next) => {
     if (!parse.success) {
       return res.status(400).json({
         message: "Datos de colección inválidos",
-        errores: parse.error.errors.map((e) => e.message)
+        errores: parse.error.issues.map((e) => e.message)
       });
     }
 
@@ -126,7 +126,7 @@ const updateColeccion = async (req, res, next) => {
     if (!parse.success) {
       return res.status(400).json({
         message: "Datos de colección inválidos",
-        errores: parse.error.errors.map((e) => e.message)
+        errores: parse.error.issues.map((e) => e.message)
       });
     }
 

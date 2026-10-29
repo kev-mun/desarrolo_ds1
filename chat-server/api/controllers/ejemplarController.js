@@ -5,8 +5,8 @@ const { ESTADOS_EJEMPLAR } = require("../models/Ejemplar");
 const { z } = require("zod");
 
 const ejemplarSchema = z.object({
-  libro: z.string({ required_error: "El libro es obligatorio" }),
-  codigoBarras: z.string({ required_error: "El código de barras es obligatorio" }).min(1).trim(),
+  libro: z.string({ error: "El libro es obligatorio" }),
+  codigoBarras: z.string({ error: "El código de barras es obligatorio" }).min(1).trim(),
   estado: z.enum(ESTADOS_EJEMPLAR).optional().default("disponible"),
   ubicacion: z.string().optional().default("")
 });
@@ -51,7 +51,7 @@ const createEjemplar = async (req, res, next) => {
     if (!parse.success) {
       return res.status(400).json({
         message: "Datos de ejemplar inválidos",
-        errores: parse.error.errors.map((e) => e.message)
+        errores: parse.error.issues.map((e) => e.message)
       });
     }
 

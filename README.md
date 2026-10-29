@@ -143,7 +143,10 @@ No existe registro público: solo `admin` y `bibliotecario` crean usuarios.
 npm test
 ```
 
-Estado actual: 7 suites y 43 pruebas. Cobertura por carpeta: modelos 100 %, middleware 88 %, rutas 99 %. Los controladores están por debajo de la meta de 80 % de HT001 y la mejora está en curso.
+Estado actual: 12 suites y 167 pruebas, todas en verde. Cobertura total: 94,9 %.
+Por carpeta: controladores 94,5 %, middleware 90 %, modelos 100 %, rutas 99 %.
+La meta de 80 % de HT001 se cumple en todos los controladores (entre 93 % y 96 %).
+`npm test` falla si la cobertura global baja de 85 %, para que no se pierda sin avisar.
 
 ## Seguridad
 
