@@ -5,8 +5,8 @@ const Usuario = require("../models/Usuario");
 const { z } = require("zod");
 
 const prestamoCreateSchema = z.object({
-  ejemplar: z.string({ required_error: "El ejemplar es obligatorio" }),
-  usuario: z.string({ required_error: "El usuario es obligatorio" })
+  ejemplar: z.string({ error: "El ejemplar es obligatorio" }),
+  usuario: z.string({ error: "El usuario es obligatorio" })
 });
 
 /**
@@ -55,7 +55,11 @@ const getPrestamos = async (req, res, next) => {
 const createPrestamo = async (req, res, next) => {
   try {
     const rawEjemplar = req.body.ejemplar || req.body.ejemplarId;
-    const rawUsuario = req.body.usuario || req.body.usuarioId;
+
+    const esLector = req.usuario.rol === "estudiante" || req.usuario.rol === "profesor";
+    const rawUsuario = esLector
+      ? String(req.usuario._id)
+      : (req.body.usuario || req.body.usuarioId);
 
     const parse = prestamoCreateSchema.safeParse({
       ejemplar: rawEjemplar,
@@ -128,7 +132,41 @@ const createPrestamo = async (req, res, next) => {
   }
 };
 
+/**
+ * Registrar devolución de un préstamo.
+ * PATCH /api/prestamos/:id/devolver  (admin, bibliotecario)
+ */
+const devolverPrestamo = async (req, res, next) => {
+  try {
+    const { id } = req.params;
+    if (!mongoose.isValidObjectId(id)) {
+      return res.status(400).json({ message: "ID de préstamo inválido" });
+    }
+
+    // Atómico: solo se devuelve una vez (evita doble devolución)
+    const prestamo = await Prestamo.findOneAndUpdate(
+      { _id: id, estado: { $in: ["activo", "vencido"] } },
+      { $set: { estado: "devuelto", fechaDevolucionReal: new Date() } },
+      { returnDocument: "after" }
+    );
+
+    if (!prestamo) {
+      const existe = await Prestamo.exists({ _id: id });
+      return existe
+        ? res.status(409).json({ message: "El préstamo ya fue devuelto" })
+        : res.status(404).json({ message: "Préstamo no encontrado" });
+    }
+
+    await Ejemplar.findByIdAndUpdate(prestamo.ejemplar, { $set: { estado: "disponible" } });
+
+    res.json(prestamo);
+  } catch (error) {
+    next(error);
+  }
+};
+
 module.exports = {
   getPrestamos,
-  createPrestamo
+  createPrestamo,
+  devolverPrestamo
 };
