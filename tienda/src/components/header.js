@@ -3,7 +3,15 @@ import { getUsuario, clearSession } from "../utils/auth.js";
 
 export function renderHeader() {
   const usuario = getUsuario();
+  const esPersonal = usuario && ["admin", "bibliotecario"].includes(usuario.rol);
   const enlaces = [{ href: "#/", texto: "Catálogo" }];
+  if (usuario) {
+    enlaces.push(
+      esPersonal
+        ? { href: "#/prestamos", texto: "Préstamos" }
+        : { href: "#/mis-prestamos", texto: "Mis préstamos" }
+    );
+  }
   const actual = location.hash.split("?")[0] || "#/";
 
   const nav = h(
