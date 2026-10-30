@@ -23,6 +23,11 @@ const errorHandler = require("./middleware/errorHandler");
 
 const app = express();
 
+// Detrás del proxy de Render hay que confiar en el primer proxy
+// (el limitador de login necesita identificar bien la IP del cliente)
+
+app.set("trust proxy", 1);
+
 // Seguridad con Helmet
 app.use(helmet());
 
