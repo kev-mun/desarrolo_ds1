@@ -2,6 +2,9 @@ const mongoose = require("mongoose");
 const Prestamo = require("../models/Prestamo");
 const Ejemplar = require("../models/Ejemplar");
 const Usuario = require("../models/Usuario");
+const Multa = require("../models/Multa");
+const { diasHabilesAtraso, calcularMonto } = require("../utils/multas");
+const { actualizarEstadosSiToca } = require("../utils/estados");
 const { z } = require("zod");
 
 const prestamoCreateSchema = z.object({
@@ -15,6 +18,8 @@ const prestamoCreateSchema = z.object({
  */
 const getPrestamos = async (req, res, next) => {
   try {
+    await actualizarEstadosSiToca();
+
     const filter = {};
 
     // Si es estudiante o profesor, solo puede ver sus propios préstamos
@@ -55,11 +60,9 @@ const getPrestamos = async (req, res, next) => {
 const createPrestamo = async (req, res, next) => {
   try {
     const rawEjemplar = req.body.ejemplar || req.body.ejemplarId;
-
+    // Los lectores solo pueden pedir préstamos a su propio nombre; el personal puede indicar el usuario.
     const esLector = req.usuario.rol === "estudiante" || req.usuario.rol === "profesor";
-    const rawUsuario = esLector
-      ? String(req.usuario._id)
-      : (req.body.usuario || req.body.usuarioId);
+    const rawUsuario = esLector ? String(req.usuario._id) : req.body.usuario || req.body.usuarioId;
 
     const parse = prestamoCreateSchema.safeParse({
       ejemplar: rawEjemplar,
@@ -92,7 +95,15 @@ const createPrestamo = async (req, res, next) => {
       });
     }
 
-    // 2. Verificar existencia previa del ejemplar
+    // 2. Bloqueo por multa pendiente
+    const multaPendiente = await Multa.exists({ usuario: usuarioId, estado: "pendiente" });
+    if (multaPendiente) {
+      return res.status(403).json({
+        message: "El usuario tiene una multa pendiente. Debe pagarla para solicitar nuevos préstamos"
+      });
+    }
+
+    // 3. Verificar existencia previa del ejemplar
     const ejemplarExiste = await Ejemplar.findById(ejemplarId);
     if (!ejemplarExiste) {
       return res.status(404).json({
@@ -100,7 +111,7 @@ const createPrestamo = async (req, res, next) => {
       });
     }
 
-    // 3. Operación atómica con findOneAndUpdate para evitar condiciones de carrera
+    // 4. Operación atómica con findOneAndUpdate para evitar condiciones de carrera
     const ejemplarActualizado = await Ejemplar.findOneAndUpdate(
       { _id: ejemplarId, estado: "disponible" },
       { $set: { estado: "prestado" } },
@@ -113,7 +124,7 @@ const createPrestamo = async (req, res, next) => {
       });
     }
 
-    // 4. Plazo provisional de 7 días
+    // 5. Plazo provisional de 7 días
     const fechaPrestamo = new Date();
     const fechaVencEsperada = new Date(Date.now() + 7 * 24 * 60 * 60 * 1000);
 
@@ -133,7 +144,7 @@ const createPrestamo = async (req, res, next) => {
 };
 
 /**
- * Registrar devolución de un préstamo.
+ * Registrar devolución de un préstamo. Si es tardía, genera la multa.
  * PATCH /api/prestamos/:id/devolver  (admin, bibliotecario)
  */
 const devolverPrestamo = async (req, res, next) => {
@@ -157,9 +168,25 @@ const devolverPrestamo = async (req, res, next) => {
         : res.status(404).json({ message: "Préstamo no encontrado" });
     }
 
-    await Ejemplar.findByIdAndUpdate(prestamo.ejemplar, { $set: { estado: "disponible" } });
+    // Un ejemplar prestado (o dado por perdido y luego encontrado) vuelve a estar disponible
+    await Ejemplar.findOneAndUpdate(
+      { _id: prestamo.ejemplar, estado: { $in: ["prestado", "perdido"] } },
+      { $set: { estado: "disponible" } }
+    );
 
-    res.json(prestamo);
+    let multa = null;
+    const diasAtraso = diasHabilesAtraso(prestamo.fechaVencEsperada, prestamo.fechaDevolucionReal);
+    if (diasAtraso > 0) {
+      multa = await Multa.create({
+        prestamo: prestamo._id,
+        ejemplar: prestamo.ejemplar,
+        usuario: prestamo.usuario,
+        diasAtraso,
+        monto: calcularMonto(diasAtraso)
+      });
+    }
+
+    res.json({ ...prestamo.toObject(), multa });
   } catch (error) {
     next(error);
   }

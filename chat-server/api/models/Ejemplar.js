@@ -1,6 +1,8 @@
 const mongoose = require("mongoose");
 
-const ESTADOS_EJEMPLAR = ["disponible", "prestado", "reservado", "danado", "extraviado"];
+// "danado" y "extraviado" se conservan por compatibilidad con datos anteriores.
+// "perdido" (automático a los 120 días) y "dado_de_baja" (solo personal, con motivo) son los estados nuevos.
+const ESTADOS_EJEMPLAR = ["disponible", "prestado", "reservado", "perdido", "dado_de_baja", "danado", "extraviado"];
 
 const ejemplarSchema = new mongoose.Schema(
   {
@@ -27,6 +29,21 @@ const ejemplarSchema = new mongoose.Schema(
       type: String,
       trim: true,
       default: ""
+    },
+    motivoBaja: {
+      type: String,
+      trim: true,
+      default: "",
+      required: [
+        function () {
+          return this.estado === "dado_de_baja";
+        },
+        "El motivo de la baja es obligatorio"
+      ]
+    },
+    fechaBaja: {
+      type: Date,
+      default: null
     }
   },
   {
