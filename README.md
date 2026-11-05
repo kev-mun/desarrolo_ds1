@@ -84,23 +84,17 @@ Se ejecutan desde `chat-server/`.
 
 `npm run seed` crea usuarios de cada rol, colecciones, 12 libros y sus ejemplares, e imprime la tabla de credenciales de prueba en la consola.
 
-| Rol           | Correo                       | Contraseña  |
-| ------------- | ---------------------------- | ----------- |
-| admin         | admin@biblioteca.com         | Admin12345  |
-| bibliotecario | bibliotecario@biblioteca.com | Biblio12345 |
-| estudiante    | estudiante@biblioteca.com    | Est12345    |
-
-El profesor y la editorial de prueba tienen sus credenciales en la tabla que imprime el seed. Estas credenciales son solo para desarrollo.
+Pide las credenciales de demostración a los autores.
 
 ## Uso rápido
 
 1. Inicia la API: `npm run dev`
-2. Inicia sesión:
+2. Inicia sesión con tus credenciales obtenidas:
 
 ```bash
 curl -X POST http://localhost:8080/api/auth/login \
   -H "Content-Type: application/json" \
-  -d '{"correo":"admin@biblioteca.com","password":"Admin12345"}'
+  -d '{"correo":"admin@biblioteca.com","password":"TU_PASSWORD"}'
 ```
 
 3. Usa el `token` recibido en las demás peticiones:
@@ -123,6 +117,31 @@ La referencia completa de endpoints está en [docs/API.md](docs/API.md).
 
 No existe registro público: solo `admin` y `bibliotecario` crean usuarios.
 
+## Funcionalidades
+
+- **Estados de ejemplares:** soporte para estados `disponible`, `prestado`, `reservado`, `danado`, `extraviado`, `perdido` (transición automática cuando un préstamo cumple 120 días vencido) y `dado_de_baja` (con motivo obligatorio y fecha de baja).
+- **Multas y penalizaciones:** multas fijas de 1.000 COP para estudiantes y 2.500 COP para profesores, incrementadas en +100 COP por cada día hábil transcurrido a partir del 8.º día hábil de retraso. Bloqueo automático para solicitar nuevos préstamos mientras el usuario tenga multas pendientes. Registro de pago simulado.
+- **Dashboard analítico:** agregaciones con vistas normales (`vista_prestamos_activos`, `vista_libros_populares`, `vista_multas_pendientes`) y vista materializada (`vm_prestamos_mensual`) actualizada periódicamente o bajo demanda.
+- **Ventana modal con doble clic:** interacción accesible en la interfaz web para abrir la vista detallada de cualquier recurso haciendo doble clic o presionando Enter.
+
+## Endpoints
+
+| Método | Endpoint | Roles permitidos | Descripción |
+| ------ | -------- | ---------------- | ----------- |
+| `PATCH` | `/api/ejemplares/:id/baja` | `admin`, `bibliotecario` | Da de baja un ejemplar registrando el motivo |
+| `GET` | `/api/multas` | Autenticado (`admin` y `bibliotecario` ven todas; `estudiante` y `profesor` solo las suyas) | Consulta de multas con totales pendientes |
+| `PATCH` | `/api/multas/:id/pagar` | Autenticado (dueño de la multa, `admin` o `bibliotecario`) | Registra el pago simulado de una multa |
+| `GET` | `/api/dashboard` | `admin`, `bibliotecario` | Obtiene métricas y resúmenes analíticos del sistema |
+| `POST` | `/api/dashboard/refrescar` | `admin`, `bibliotecario` | Fuerza el refresco de la vista materializada del dashboard |
+
+## Fuera de alcance
+
+- Reservas con cola
+- Solicitudes con aprobación
+- Renovaciones
+- Colecciones adicionales (reserva, referencia, hemeroteca, mapoteca, tecnoteca)
+- Tiempo real
+
 ## Historias de usuario cubiertas
 
 | Historia                                                                | Estado                                                      |
@@ -131,7 +150,7 @@ No existe registro público: solo `admin` y `bibliotecario` crean usuarios.
 | HU 0013 Permisos de editoriales                                         | Implementada                                                |
 | HU 0005 Selección de colección                                          | Implementada                                                |
 | HU 0006 Registro de préstamos                                           | Implementada (plazo provisional de 7 días)                  |
-| HU 0007 Registro de estados                                             | Parcial (estado del ejemplar)                               |
+| HU 0007 Registro de estados                                             | Implementada (incluye perdido y dado de baja)               |
 | HT001 Modelo de datos y API base                                        | Implementada                                                |
 | HT005 Búsqueda de texto                                                 | Implementada (parcial, sin distinguir tildes ni mayúsculas) |
 | HU 0001, 0003, 0004, 0008, 0009, 0010, 0011, 0012                       | Pendientes                                                  |
@@ -143,10 +162,7 @@ No existe registro público: solo `admin` y `bibliotecario` crean usuarios.
 npm test
 ```
 
-Estado actual: 12 suites y 167 pruebas, todas en verde. Cobertura total: 94,9 %.
-Por carpeta: controladores 94,5 %, middleware 90 %, modelos 100 %, rutas 99 %.
-La meta de 80 % de HT001 se cumple en todos los controladores (entre 93 % y 96 %).
-`npm test` falla si la cobertura global baja de 85 %, para que no se pierda sin avisar.
+Estado actual: 15 suites, 200 pruebas, 95 % de cobertura, barrera mínima de 85 %.
 
 ## Seguridad
 
