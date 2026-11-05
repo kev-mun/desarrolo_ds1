@@ -52,8 +52,10 @@ app.use(express.json());
 // Rutas de la API
 const bajaRoutes = require("./routes/bajaRoutes");
 const multaRoutes = require("./routes/multaRoutes");
+const dashboardRoutes = require("./routes/dashboardRoutes");
 app.use("/api/ejemplares", bajaRoutes);
 app.use("/api/multas", multaRoutes);
+app.use("/api/dashboard", dashboardRoutes);
 app.use("/api", routes);
 
 // Ruta base informativa
