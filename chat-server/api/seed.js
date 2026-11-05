@@ -124,7 +124,8 @@ const seedDatabase = async () => {
         anio: 1967,
         categoria: "Novela",
         coleccion: cMap["Literatura Clásica e Hispanoamericana"],
-        portada: "https://images.unsplash.com/photo-1544716278-ca5e3f4abd8c?auto=format&fit=crop&w=500&q=80"
+        portada: "https://images.unsplash.com/photo-1544716278-ca5e3f4abd8c?auto=format&fit=crop&w=500&q=80",
+        cloudinaryId: "cien"
       },
       {
         titulo: "Don Quijote de la Mancha",
@@ -134,7 +135,8 @@ const seedDatabase = async () => {
         anio: 1605,
         categoria: "Clásico",
         coleccion: cMap["Literatura Clásica e Hispanoamericana"],
-        portada: "https://images.unsplash.com/photo-1512820790803-83ca734da794?auto=format&fit=crop&w=500&q=80"
+        portada: "https://images.unsplash.com/photo-1512820790803-83ca734da794?auto=format&fit=crop&w=500&q=80",
+        cloudinaryId: "mancha"
       },
       {
         titulo: "Ficciones",
@@ -144,7 +146,8 @@ const seedDatabase = async () => {
         anio: 1944,
         categoria: "Cuento",
         coleccion: cMap["Literatura Clásica e Hispanoamericana"],
-        portada: "https://images.unsplash.com/photo-1497633762265-9d179a990aa6?auto=format&fit=crop&w=500&q=80"
+        portada: "https://images.unsplash.com/photo-1497633762265-9d179a990aa6?auto=format&fit=crop&w=500&q=80",
+        cloudinaryId: "ficciones"
       },
       {
         titulo: "La sombra del viento",
@@ -154,7 +157,8 @@ const seedDatabase = async () => {
         anio: 2001,
         categoria: "Misterio",
         coleccion: cMap["Literatura Clásica e Hispanoamericana"],
-        portada: "https://images.unsplash.com/photo-1476275466078-4007374efbbe?auto=format&fit=crop&w=500&q=80"
+        portada: "https://images.unsplash.com/photo-1476275466078-4007374efbbe?auto=format&fit=crop&w=500&q=80",
+        cloudinaryId: "viento"
       },
       {
         titulo: "Fahrenheit 451",
@@ -164,7 +168,8 @@ const seedDatabase = async () => {
         anio: 1953,
         categoria: "Distopía",
         coleccion: cMap["Ciencia Ficción y Fantasía"],
-        portada: "https://images.unsplash.com/photo-1507842229452-7b1897d28734?auto=format&fit=crop&w=500&q=80"
+        portada: "https://images.unsplash.com/photo-1507842229452-7b1897d28734?auto=format&fit=crop&w=500&q=80",
+        cloudinaryId: "faren"
       },
       {
         titulo: "Dune",
@@ -174,7 +179,8 @@ const seedDatabase = async () => {
         anio: 1965,
         categoria: "Ciencia Ficción",
         coleccion: cMap["Ciencia Ficción y Fantasía"],
-        portada: "https://images.unsplash.com/photo-1518770660439-4636190af475?auto=format&fit=crop&w=500&q=80"
+        portada: "https://images.unsplash.com/photo-1518770660439-4636190af475?auto=format&fit=crop&w=500&q=80",
+        cloudinaryId: "dune"
       },
       {
         titulo: "Neuromante",
@@ -184,7 +190,8 @@ const seedDatabase = async () => {
         anio: 1984,
         categoria: "Cyberpunk",
         coleccion: cMap["Ciencia Ficción y Fantasía"],
-        portada: "https://images.unsplash.com/photo-1526374965328-7f61d4dc18c5?auto=format&fit=crop&w=500&q=80"
+        portada: "https://images.unsplash.com/photo-1526374965328-7f61d4dc18c5?auto=format&fit=crop&w=500&q=80",
+        cloudinaryId: "neuro"
       },
       {
         titulo: "Estructura e Interpretación de Programas de Computadora",
@@ -194,7 +201,8 @@ const seedDatabase = async () => {
         anio: 1996,
         categoria: "Programación",
         coleccion: cMap["Ciencias de la Computación y Software"],
-        portada: "https://images.unsplash.com/photo-1515879218367-8466d910aaa4?auto=format&fit=crop&w=500&q=80"
+        portada: "https://images.unsplash.com/photo-1515879218367-8466d910aaa4?auto=format&fit=crop&w=500&q=80",
+        cloudinaryId: "estructura"
       },
       {
         titulo: "Código Limpio (Clean Code)",
@@ -204,7 +212,9 @@ const seedDatabase = async () => {
         anio: 2008,
         categoria: "Ingeniería de Software",
         coleccion: cMap["Ciencias de la Computación y Software"],
-        portada: "https://images.unsplash.com/photo-1555066931-4365d14bab8c?auto=format&fit=crop&w=500&q=80"
+        portada: "https://res.cloudinary.com/fs67c4g1/image/upload/v1793886478/clean-code.jpg",
+        imagenUrl: "https://res.cloudinary.com/fs67c4g1/image/upload/v1793886478/clean-code.jpg",
+        cloudinaryId: "images"
       },
       {
         titulo: "Patrones de Diseño",
@@ -214,7 +224,8 @@ const seedDatabase = async () => {
         anio: 1994,
         categoria: "Arquitectura de Software",
         coleccion: cMap["Ciencias de la Computación y Software"],
-        portada: "https://images.unsplash.com/photo-1531482615713-2afd69097998?auto=format&fit=crop&w=500&q=80"
+        portada: "https://images.unsplash.com/photo-1531482615713-2afd69097998?auto=format&fit=crop&w=500&q=80",
+        cloudinaryId: "diseño"
       },
       {
         titulo: "Sapiens: De animales a dioses",
@@ -224,7 +235,8 @@ const seedDatabase = async () => {
         anio: 2014,
         categoria: "Historia",
         coleccion: cMap["Historia, Ensayo y Filosofía"],
-        portada: "https://images.unsplash.com/photo-1461360370896-922624d12aa1?auto=format&fit=crop&w=500&q=80"
+        portada: "https://images.unsplash.com/photo-1461360370896-922624d12aa1?auto=format&fit=crop&w=500&q=80",
+        cloudinaryId: "sapiesn"
       },
       {
         titulo: "El laberinto de la soledad",
@@ -234,7 +246,8 @@ const seedDatabase = async () => {
         anio: 1950,
         categoria: "Ensayo",
         coleccion: cMap["Historia, Ensayo y Filosofía"],
-        portada: "https://images.unsplash.com/photo-1457369804613-52c61a468e7d?auto=format&fit=crop&w=500&q=80"
+        portada: "https://images.unsplash.com/photo-1457369804613-52c61a468e7d?auto=format&fit=crop&w=500&q=80",
+        cloudinaryId: "laberinto"
       }
     ];
 

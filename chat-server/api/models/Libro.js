@@ -40,6 +40,14 @@ const libroSchema = new mongoose.Schema(
     portada: {
       type: String,
       default: ""
+    },
+    imagenUrl: {
+      type: String,
+      default: ""
+    },
+    cloudinaryId: {
+      type: String,
+      default: ""
     }
   },
   {

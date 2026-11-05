@@ -3,6 +3,7 @@ import { request } from "../api/client.js";
 import { getQuery } from "../utils/router.js";
 import { alDobleClic } from "../components/modal.js";
 import { abrirDetalleLibro } from "../components/detalles.js";
+import { getUrlPortadaLibro } from "../utils/cloudinary.js";
 
 export async function renderCatalogo(salida) {
   const consulta = getQuery();
@@ -70,11 +71,16 @@ export async function renderCatalogo(salida) {
     const total = libro.ejemplaresTotales ?? 0;
     const libres = libro.ejemplaresDisponibles ?? 0;
     const disponibilidad = libres === 0 ? "Sin ejemplares disponibles" : `${libres} de ${total} ejemplares disponibles`;
+    const imagen = getUrlPortadaLibro(libro);
+    const nodoPortada = imagen
+      ? h("div", { class: "portada" }, h("img", { src: imagen, alt: `Portada de ${libro.titulo || "libro"}`, loading: "lazy" }))
+      : h("div", { class: "portada", "aria-hidden": "true" }, (libro.titulo || "?").charAt(0).toUpperCase());
+
     return alDobleClic(
       h(
         "article",
         { class: "libro" },
-        h("div", { class: "portada", "aria-hidden": "true" }, (libro.titulo || "?").charAt(0).toUpperCase()),
+        nodoPortada,
         h(
           "div",
           { class: "libro-info" },

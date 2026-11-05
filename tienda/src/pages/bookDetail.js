@@ -3,6 +3,7 @@ import { request } from "../api/client.js";
 import { getUsuario } from "../utils/auth.js";
 import { formatFecha } from "../utils/format.js";
 import { toast } from "../utils/toast.js";
+import { getUrlPortadaLibro } from "../utils/cloudinary.js";
 
 const ESTADOS = {
   disponible: "Disponible",
@@ -66,12 +67,17 @@ export async function renderLibro(salida, [id]) {
 
   const dato = (etiqueta, valor) => (valor ? h("div", {}, h("dt", {}, etiqueta), h("dd", {}, valor)) : null);
 
+  const imagen = getUrlPortadaLibro(libro);
+  const nodoPortada = imagen
+    ? h("div", { class: "portada grande" }, h("img", { src: imagen, alt: `Portada de ${libro.titulo || "libro"}` }))
+    : h("div", { class: "portada grande", "aria-hidden": "true" }, (libro.titulo || "?").charAt(0).toUpperCase());
+
   salida.replaceChildren(
     h("a", { class: "btn btn-sec", href: "#/" }, "← Volver al catálogo"),
     h(
       "section",
       { class: "tarjeta detalle" },
-      h("div", { class: "portada grande", "aria-hidden": "true" }, (libro.titulo || "?").charAt(0).toUpperCase()),
+      nodoPortada,
       h(
         "div",
         {},

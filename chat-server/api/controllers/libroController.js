@@ -14,7 +14,9 @@ const libroCreateSchema = z.object({
   anio: z.number().int().positive({ message: 'El año debe ser un número entero positivo' }),
   categoria: z.string().min(1, { message: 'La categoría es obligatoria' }).trim(),
   coleccion: z.string().optional().refine(val => !val || mongoose.isValidObjectId(val), { message: 'ID de colección inválido' }),
-  portada: z.string().optional()
+  portada: z.string().optional(),
+  imagenUrl: z.string().optional(),
+  cloudinaryId: z.string().optional()
 });
 
 const libroUpdateSchema = libroCreateSchema.partial();
@@ -160,7 +162,9 @@ const createLibro = async (req, res, next) => {
       anio: data.anio,
       categoria: data.categoria.trim(),
       coleccion: data.coleccion || null,
-      portada: data.portada || ''
+      portada: data.portada || data.imagenUrl || '',
+      imagenUrl: data.imagenUrl || data.portada || '',
+      cloudinaryId: data.cloudinaryId || ''
     });
 
     res.status(201).json(nuevo);
@@ -203,7 +207,7 @@ const updateLibro = async (req, res, next) => {
     }
 
     // Actualizar campos permitidos
-    const fields = ['titulo', 'autor', 'isbn', 'editorial', 'anio', 'categoria', 'coleccion', 'portada'];
+    const fields = ['titulo', 'autor', 'isbn', 'editorial', 'anio', 'categoria', 'coleccion', 'portada', 'imagenUrl', 'cloudinaryId'];
     fields.forEach(f => {
       if (data[f] !== undefined) {
         if (f === 'coleccion') {
