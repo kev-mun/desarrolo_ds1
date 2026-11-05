@@ -1,6 +1,8 @@
 import { h } from "../utils/dom.js";
 import { request } from "../api/client.js";
 import { getQuery } from "../utils/router.js";
+import { alDobleClic } from "../components/modal.js";
+import { abrirDetalleLibro } from "../components/detalles.js";
 
 export async function renderCatalogo(salida) {
   const consulta = getQuery();
@@ -68,19 +70,23 @@ export async function renderCatalogo(salida) {
     const total = libro.ejemplaresTotales ?? 0;
     const libres = libro.ejemplaresDisponibles ?? 0;
     const disponibilidad = libres === 0 ? "Sin ejemplares disponibles" : `${libres} de ${total} ejemplares disponibles`;
-    return h(
-      "article",
-      { class: "libro" },
-      h("div", { class: "portada", "aria-hidden": "true" }, (libro.titulo || "?").charAt(0).toUpperCase()),
+    return alDobleClic(
       h(
-        "div",
-        { class: "libro-info" },
-        libro.categoria ? h("span", { class: "etiqueta" }, libro.categoria) : null,
-        h("h3", {}, libro.titulo),
-        h("p", { class: "muted" }, libro.autor),
-        h("p", { class: `disp ${libres === 0 ? "sin" : "ok"}` }, disponibilidad),
-        h("a", { class: "btn btn-sec", href: `#/libro/${libro._id}` }, "Ver detalle")
-      )
+        "article",
+        { class: "libro" },
+        h("div", { class: "portada", "aria-hidden": "true" }, (libro.titulo || "?").charAt(0).toUpperCase()),
+        h(
+          "div",
+          { class: "libro-info" },
+          libro.categoria ? h("span", { class: "etiqueta" }, libro.categoria) : null,
+          h("h3", {}, libro.titulo),
+          h("p", { class: "muted" }, libro.autor),
+          h("p", { class: `disp ${libres === 0 ? "sin" : "ok"}` }, disponibilidad),
+          h("a", { class: "btn btn-sec", href: `#/libro/${libro._id}` }, "Ver detalle")
+        )
+      ),
+      () => abrirDetalleLibro(libro._id),
+      "Doble clic para ver el recurso"
     );
   };
 

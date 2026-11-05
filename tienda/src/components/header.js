@@ -6,11 +6,18 @@ export function renderHeader() {
   const esPersonal = usuario && ["admin", "bibliotecario"].includes(usuario.rol);
   const enlaces = [{ href: "#/", texto: "Catálogo" }];
   if (usuario) {
-    enlaces.push(
-      esPersonal
-        ? { href: "#/prestamos", texto: "Préstamos" }
-        : { href: "#/mis-prestamos", texto: "Mis préstamos" }
-    );
+    if (esPersonal) {
+      enlaces.push(
+        { href: "#/prestamos", texto: "Préstamos" },
+        { href: "#/dashboard", texto: "Dashboard" },
+        { href: "#/usuarios", texto: "Usuarios" }
+      );
+    } else {
+      enlaces.push(
+        { href: "#/mis-prestamos", texto: "Mis préstamos" },
+        { href: "#/mis-multas", texto: "Mis multas" }
+      );
+    }
   }
   const actual = location.hash.split("?")[0] || "#/";
 

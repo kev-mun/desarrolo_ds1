@@ -52,12 +52,15 @@ export async function renderPrestamosPersonal(salida) {
     cuerpo.replaceChildren(h("p", {}, "Cargando préstamos…"));
     try {
       const params = {};
-      if (filtro === "activo" || filtro === "vencido") params.estado = "activo";
       if (filtro === "devuelto") params.estado = "devuelto";
 
       const r = await request("/prestamos", { params });
       let lista = Array.isArray(r) ? r : r.data || [];
-      if (filtro === "vencido") lista = lista.filter((p) => estadoVisible(p) === "vencido");
+      if (filtro === "activo") {
+        lista = lista.filter((p) => p.estado !== "devuelto");
+      } else if (filtro === "vencido") {
+        lista = lista.filter((p) => estadoVisible(p) === "vencido");
+      }
 
       if (!lista.length) {
         cuerpo.replaceChildren(h("p", { class: "vacio" }, "No hay préstamos con este filtro."));

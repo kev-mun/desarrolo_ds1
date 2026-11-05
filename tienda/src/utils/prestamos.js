@@ -1,8 +1,11 @@
 import { h } from "./dom.js";
 import { formatFecha } from "./format.js";
 
-// "vencido" se calcula aquí: el API aún no cambia el estado solo (llega con el motor de reglas)
+// "vencido": el backend lo actualiza periódicamente a "vencido", o se detecta aquí si aún figura "activo" y expiró
 export function estadoVisible(p) {
+  if (p.estado === "vencido") {
+    return "vencido";
+  }
   if (p.estado === "activo" && p.fechaVencEsperada && new Date(p.fechaVencEsperada) < new Date()) {
     return "vencido";
   }
