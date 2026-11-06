@@ -1,6 +1,5 @@
 const jwt = require("jsonwebtoken");
 const Usuario = require("../models/Usuario");
-const { ROLES } = require("../models/Usuario");
 const { JWT_SECRET } = require("../middleware/auth");
 const { z } = require("zod");
 
@@ -9,12 +8,12 @@ const loginSchema = z.object({
   password: z.string({ error: "La contraseña es obligatoria" }).min(1, "La contraseña es obligatoria")
 });
 
+// El registro público solo acepta estrictamente estos cuatro campos
 const registerSchema = z.object({
   nombre: z.string({ error: "El nombre es obligatorio" }).min(1, "El nombre es obligatorio").trim(),
   documento: z.string({ error: "El documento es obligatorio" }).min(1, "El documento es obligatorio").trim(),
   correo: z.string({ error: "El correo es obligatorio" }).email("Correo electrónico inválido").trim().toLowerCase(),
-  password: z.string({ error: "La contraseña es obligatoria" }).min(6, "La contraseña debe tener al menos 6 caracteres"),
-  rol: z.enum(ROLES, { error: "Rol inválido" }).optional().default("estudiante")
+  password: z.string({ error: "La contraseña es obligatoria" }).min(8, "La contraseña debe tener al menos 8 caracteres")
 });
 
 const login = async (req, res, next) => {
@@ -85,7 +84,8 @@ const register = async (req, res, next) => {
       });
     }
 
-    const { nombre, documento, correo, password, rol } = parseResult.data;
+    // Solo se leen los campos permitidos. Cualquier campo como rol, estado o permisos es descartado
+    const { nombre, documento, correo, password } = parseResult.data;
 
     // Verificar si el documento ya existe
     const docExistente = await Usuario.findOne({ documento });
@@ -95,7 +95,7 @@ const register = async (req, res, next) => {
       });
     }
 
-    // Verificar si el correo ya existe
+    // Verificar si el correo ya existe (comparando en minúsculas)
     const correoExistente = await Usuario.findOne({ correo });
     if (correoExistente) {
       return res.status(409).json({
@@ -103,12 +103,13 @@ const register = async (req, res, next) => {
       });
     }
 
+    // El registro público SIEMPRE asigna rol estudiante, estado activo y permisos vacíos
     const nuevoUsuario = new Usuario({
       nombre,
       documento,
       correo,
       password,
-      rol: rol || "estudiante",
+      rol: "estudiante",
       estado: "activo",
       permisos: []
     });

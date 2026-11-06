@@ -132,14 +132,14 @@ describe("Pruebas de Autenticación (/api/auth)", () => {
       expect(res.body).toHaveProperty("errores");
     });
 
-    test("Debería rechazar si la contraseña tiene menos de 6 caracteres con 400", async () => {
+    test("Debería rechazar si la contraseña tiene menos de 8 caracteres con 400", async () => {
       const res = await request(app)
         .post("/api/auth/register")
         .send({
           nombre: "Pass Corto",
           documento: "11223344",
           correo: "corto@biblioteca.com",
-          password: "123"
+          password: "1234567"
         });
 
       expect(res.status).toBe(400);

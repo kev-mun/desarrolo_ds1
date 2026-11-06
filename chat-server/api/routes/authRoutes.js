@@ -14,8 +14,18 @@ const loginLimiter = rateLimit({
   }
 });
 
+const registerLimiter = rateLimit({
+  windowMs: 60 * 60 * 1000, // 1 hora
+  max: process.env.NODE_ENV === "test" ? Infinity : 10, // 10 registros por hora por IP
+  standardHeaders: true,
+  legacyHeaders: false,
+  message: {
+    message: "Demasiados intentos de registro desde esta dirección IP. Por favor intente más tarde."
+  }
+});
+
 router.post("/login", loginLimiter, login);
-router.post("/register", register);
-router.post("/signup", register);
+router.post("/register", registerLimiter, register);
+router.post("/signup", registerLimiter, register);
 
 module.exports = router;

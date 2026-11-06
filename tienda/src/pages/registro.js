@@ -15,14 +15,7 @@ export function renderRegistro(salida) {
   const nombre = h("input", { type: "text", id: "nombre", required: true, autocomplete: "name", placeholder: "Tu nombre completo" });
   const documento = h("input", { type: "text", id: "documento", required: true, autocomplete: "off", placeholder: "Número de identificación" });
   const correo = h("input", { type: "email", id: "correo", required: true, autocomplete: "username", placeholder: "correo@ejemplo.com" });
-  const password = h("input", { type: "password", id: "password", required: true, autocomplete: "new-password", placeholder: "Mínimo 6 caracteres" });
-
-  const rol = h(
-    "select",
-    { id: "rol" },
-    h("option", { value: "estudiante" }, "Estudiante"),
-    h("option", { value: "profesor" }, "Profesor")
-  );
+  const password = h("input", { type: "password", id: "password", required: true, autocomplete: "new-password", minlength: "8", placeholder: "Mínimo 8 caracteres" });
 
   const boton = h("button", { type: "submit", class: "btn" }, "Registrarse");
 
@@ -49,7 +42,6 @@ export function renderRegistro(salida) {
               documento: documento.value.trim(),
               correo: correo.value.trim(),
               password: password.value,
-              rol: rol.value,
             },
           });
           toast("Registro exitoso. Inicia sesión.");
@@ -70,7 +62,6 @@ export function renderRegistro(salida) {
     campo("Documento de identidad", documento),
     campo("Correo electrónico", correo),
     campo("Contraseña", password),
-    campo("Rol", rol),
     boton,
     h(
       "p",
@@ -82,4 +73,3 @@ export function renderRegistro(salida) {
 
   salida.replaceChildren(formulario);
 }
-
