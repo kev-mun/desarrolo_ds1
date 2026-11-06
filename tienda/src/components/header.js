@@ -46,7 +46,12 @@ export function renderHeader() {
           "Salir"
         )
       )
-    : null;
+    : h(
+        "div",
+        { class: "sesion" },
+        h("a", { href: "#/login", class: "btn btn-sec", style: "margin-right: 0.5rem" }, "Ingresar"),
+        h("a", { href: "#/registro", class: "btn" }, "Registrarse")
+      );
 
   return h(
     "header",

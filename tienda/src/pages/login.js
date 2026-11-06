@@ -50,7 +50,13 @@ export function renderLogin(salida) {
     alerta,
     campo("Correo", correo),
     campo("Contraseña", password),
-    boton
+    boton,
+    h(
+      "p",
+      { style: "margin-top: 1rem; font-size: 0.9rem; text-align: center" },
+      "¿No tienes una cuenta? ",
+      h("a", { href: "#/registro" }, "Crear cuenta")
+    )
   );
 
   salida.replaceChildren(formulario);

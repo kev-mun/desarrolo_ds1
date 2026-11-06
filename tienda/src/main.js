@@ -4,6 +4,7 @@ import { h } from "./utils/dom.js";
 import { addRoute, startRouter } from "./utils/router.js";
 import { renderHeader } from "./components/header.js";
 import { renderLogin } from "./pages/login.js";
+import { renderRegistro } from "./pages/registro.js";
 import { renderCatalogo } from "./pages/catalog.js";
 import { renderLibro } from "./pages/bookDetail.js";
 import { renderMisPrestamos } from "./pages/myLoans.js";
@@ -19,6 +20,7 @@ const contenido = h("main", { class: "contenedor", id: "contenido" });
 app.append(cabecera, contenido);
 
 addRoute(/^\/login$/, renderLogin, { auth: false });
+addRoute(/^\/registro$/, renderRegistro, { auth: false });
 addRoute(/^\/$/, renderCatalogo);
 addRoute(/^\/libro\/([a-f0-9]{24})$/i, renderLibro);
 addRoute(/^\/mis-prestamos$/, renderMisPrestamos);
