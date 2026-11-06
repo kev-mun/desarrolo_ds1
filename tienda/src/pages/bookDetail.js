@@ -72,6 +72,32 @@ export async function renderLibro(salida, [id]) {
     ? h("div", { class: "portada grande" }, h("img", { src: imagen, alt: `Portada de ${libro.titulo || "libro"}` }))
     : h("div", { class: "portada grande", "aria-hidden": "true" }, (libro.titulo || "?").charAt(0).toUpperCase());
 
+  const u = getUsuario();
+  const esLector = u && (u.rol === "estudiante" || u.rol === "profesor");
+  const disponibles = ejemplares.filter((e) => e.estado === "disponible").length;
+  const totalEjemplares = ejemplares.length;
+  const puedeReservar = esLector && disponibles === 0 && totalEjemplares > 0;
+
+  async function reservar(boton) {
+    if (!confirm(`¿Deseas reservar "${libro.titulo || "este libro"}"?`)) return;
+    boton.disabled = true;
+    try {
+      const r = await request("/reservas", {
+        method: "POST",
+        body: { libro: libro._id },
+      });
+      toast("Reserva registrada. Tu posición en la cola: " + (r.posicion ?? r.data?.posicion ?? 1));
+      location.hash = "#/reservas";
+    } catch (e) {
+      toast(e.message, "error");
+      boton.disabled = false;
+    }
+  }
+
+  const botonReservar = puedeReservar
+    ? h("button", { class: "btn", style: "margin-top: 0.75rem", onclick: (ev) => reservar(ev.currentTarget) }, "Reservar este libro")
+    : null;
+
   salida.replaceChildren(
     h("a", { class: "btn btn-sec", href: "#/" }, "← Volver al catálogo"),
     h(
@@ -90,7 +116,8 @@ export async function renderLibro(salida, [id]) {
           dato("Editorial", libro.editorial),
           dato("Año", libro.anio),
           dato("ISBN", libro.isbn)
-        )
+        ),
+        botonReservar
       )
     ),
     h("h2", {}, "Ejemplares"),

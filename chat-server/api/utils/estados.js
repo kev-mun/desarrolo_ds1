@@ -1,5 +1,6 @@
 const Prestamo = require("../models/Prestamo");
 const Ejemplar = require("../models/Ejemplar");
+const { vencerReservas } = require("./reservas");
 
 const DIA_MS = 24 * 60 * 60 * 1000;
 const DIAS_PARA_PERDIDO = 120;
@@ -9,6 +10,7 @@ let ultimaEjecucion = 0;
 /**
  * - Préstamos activos con la fecha límite vencida pasan a "vencido".
  * - Ejemplares con un préstamo vencido hace más de 120 días sin devolver pasan a "perdido".
+ * - Reservas listas cuyo plazo de 48 h venció pasan a "vencida" y el turno pasa al siguiente.
  */
 async function actualizarEstados(ahora = new Date()) {
   const vencidos = await Prestamo.updateMany(
@@ -32,10 +34,12 @@ async function actualizarEstados(ahora = new Date()) {
     perdidos = r.modifiedCount;
   }
 
+  await vencerReservas(ahora);
+
   return { vencidos: vencidos.modifiedCount, perdidos };
 }
 
-/** Igual que actualizarEstados, pero como máximo una vez por minuto (se usa al consultar préstamos). */
+/** Igual que actualizarEstados, pero como máximo una vez por minuto (se usa al consultar). */
 async function actualizarEstadosSiToca() {
   const ahora = Date.now();
   if (ahora - ultimaEjecucion < INTERVALO_MS) return null;

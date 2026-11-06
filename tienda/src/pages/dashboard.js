@@ -96,6 +96,13 @@ export async function renderDashboard(salida) {
           ["#", "Título", "Autor", "Renovaciones"],
           (d.masRenovados || []).map(filaLibro),
           "Aún no hay renovaciones registradas."
+        ),
+        seccion(
+          "Recursos más reservados",
+          "Vista normal. Doble clic sobre un recurso para ver su información.",
+          ["#", "Título", "Autor", "Reservas"],
+          (d.masReservados || []).map(filaLibro),
+          "Aún no hay reservas registradas."
         )
       );
     } catch (e) {

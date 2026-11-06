@@ -19,9 +19,10 @@ const getDashboard = async (req, res, next) => {
       masPrestados = await vistas.leer(vistas.MV_MAS_PRESTADOS, TOP, { total: -1, titulo: 1 });
     }
 
-    const [morosos, masRenovados, activos, vencidos, multasPendientes, perdidos] = await Promise.all([
+    const [morosos, masRenovados, masReservados, activos, vencidos, multasPendientes, perdidos] = await Promise.all([
       vistas.leer(vistas.VISTA_MOROSOS, TOP),
       vistas.leer(vistas.VISTA_MAS_RENOVADOS, TOP),
+      vistas.leer(vistas.VISTA_MAS_RESERVADOS, TOP),
       Prestamo.countDocuments({ estado: "activo" }),
       Prestamo.countDocuments({ estado: "vencido" }),
       Multa.find({ estado: "pendiente" }).select("monto"),
@@ -39,6 +40,7 @@ const getDashboard = async (req, res, next) => {
       morosos,
       masPrestados,
       masRenovados,
+      masReservados,
       actualizadoEn: masPrestados[0] ? masPrestados[0].actualizadoEn : null
     });
   } catch (error) {

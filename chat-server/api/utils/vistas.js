@@ -3,6 +3,7 @@ const Prestamo = require("../models/Prestamo");
 const Ejemplar = require("../models/Ejemplar");
 const Libro = require("../models/Libro");
 const Usuario = require("../models/Usuario");
+const Reserva = require("../models/Reserva");
 
 /**
  * Vistas del dashboard (MongoDB):
@@ -11,6 +12,7 @@ const Usuario = require("../models/Usuario");
  */
 const VISTA_MOROSOS = "vista_morosos";
 const VISTA_MAS_RENOVADOS = "vista_mas_renovados";
+const VISTA_MAS_RESERVADOS = "vista_mas_reservados";
 const MV_MAS_PRESTADOS = "mv_mas_prestados";
 
 // Agrupa un valor por préstamo -> ejemplar -> libro
@@ -20,6 +22,16 @@ const pipelinePorLibro = (acumulador, filtroFinal) => [
   { $unwind: "$ej" },
   { $group: { _id: "$ej.libro", total: { $sum: "$total" } } },
   ...(filtroFinal ? [{ $match: filtroFinal }] : []),
+  { $lookup: { from: Libro.collection.name, localField: "_id", foreignField: "_id", as: "libro" } },
+  { $unwind: "$libro" },
+  { $project: { _id: 1, titulo: "$libro.titulo", autor: "$libro.autor", total: 1 } },
+  { $sort: { total: -1, titulo: 1 } }
+];
+
+// Reservas agrupadas por libro (las canceladas no cuentan)
+const pipelineMasReservados = () => [
+  { $match: { estado: { $ne: "cancelada" } } },
+  { $group: { _id: "$libro", total: { $sum: 1 } } },
   { $lookup: { from: Libro.collection.name, localField: "_id", foreignField: "_id", as: "libro" } },
   { $unwind: "$libro" },
   { $project: { _id: 1, titulo: "$libro.titulo", autor: "$libro.autor", total: 1 } },
@@ -65,12 +77,13 @@ async function existeColeccion(nombre) {
 async function asegurarVistas() {
   const db = mongoose.connection.db;
   const definiciones = [
-    [VISTA_MOROSOS, pipelineMorosos()],
-    [VISTA_MAS_RENOVADOS, pipelinePorLibro({ $sum: { $size: "$renovaciones" } }, { total: { $gt: 0 } })]
+    [VISTA_MOROSOS, Prestamo.collection.name, pipelineMorosos()],
+    [VISTA_MAS_RENOVADOS, Prestamo.collection.name, pipelinePorLibro({ $sum: { $size: "$renovaciones" } }, { total: { $gt: 0 } })],
+    [VISTA_MAS_RESERVADOS, Reserva.collection.name, pipelineMasReservados()]
   ];
-  for (const [nombre, pipeline] of definiciones) {
+  for (const [nombre, origen, pipeline] of definiciones) {
     if (!(await existeColeccion(nombre))) {
-      await db.createCollection(nombre, { viewOn: Prestamo.collection.name, pipeline });
+      await db.createCollection(nombre, { viewOn: origen, pipeline });
     }
   }
 }
@@ -90,6 +103,7 @@ async function leer(nombre, limite, orden) {
 module.exports = {
   VISTA_MOROSOS,
   VISTA_MAS_RENOVADOS,
+  VISTA_MAS_RESERVADOS,
   MV_MAS_PRESTADOS,
   asegurarVistas,
   refrescarMaterializadas,

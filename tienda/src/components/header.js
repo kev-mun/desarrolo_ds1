@@ -9,12 +9,14 @@ export function renderHeader() {
     if (esPersonal) {
       enlaces.push(
         { href: "#/prestamos", texto: "Préstamos" },
+        { href: "#/reservas", texto: "Reservas" },
         { href: "#/dashboard", texto: "Dashboard" },
         { href: "#/usuarios", texto: "Usuarios" }
       );
     } else {
       enlaces.push(
         { href: "#/mis-prestamos", texto: "Mis préstamos" },
+        { href: "#/reservas", texto: "Mis reservas" },
         { href: "#/mis-multas", texto: "Mis multas" }
       );
     }

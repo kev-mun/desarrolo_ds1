@@ -5,6 +5,7 @@ const Usuario = require("../models/Usuario");
 const Multa = require("../models/Multa");
 const { diasHabilesAtraso, calcularMonto } = require("../utils/multas");
 const { actualizarEstadosSiToca } = require("../utils/estados");
+const { asignarSiguiente } = require("../utils/reservas");
 const { PLAZO_DIAS, MAX_RENOVACIONES, reservasEnEspera } = require("../utils/reglas");
 const { z } = require("zod");
 
@@ -170,10 +171,14 @@ const devolverPrestamo = async (req, res, next) => {
     }
 
     // Un ejemplar prestado (o dado por perdido y luego encontrado) vuelve a estar disponible
-    await Ejemplar.findOneAndUpdate(
+    const ejemplarLiberado = await Ejemplar.findOneAndUpdate(
       { _id: prestamo.ejemplar, estado: { $in: ["prestado", "perdido"] } },
-      { $set: { estado: "disponible" } }
+      { $set: { estado: "disponible" } },
+      { returnDocument: "after" }
     );
+
+    // Si hay una cola de reservas, el ejemplar se aparta para el primero
+    if (ejemplarLiberado) await asignarSiguiente(ejemplarLiberado.libro);
 
     let multa = null;
     const diasAtraso = diasHabilesAtraso(prestamo.fechaVencEsperada, prestamo.fechaDevolucionReal);

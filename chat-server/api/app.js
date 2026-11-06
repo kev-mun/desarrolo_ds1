@@ -53,9 +53,11 @@ app.use(express.json());
 const bajaRoutes = require("./routes/bajaRoutes");
 const multaRoutes = require("./routes/multaRoutes");
 const dashboardRoutes = require("./routes/dashboardRoutes");
+const reservaRoutes = require("./routes/reservaRoutes");
 app.use("/api/ejemplares", bajaRoutes);
 app.use("/api/multas", multaRoutes);
 app.use("/api/dashboard", dashboardRoutes);
+app.use("/api/reservas", reservaRoutes);
 app.use("/api", routes);
 
 // Ruta base informativa

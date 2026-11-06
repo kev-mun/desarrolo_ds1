@@ -11,6 +11,7 @@ import { renderPrestamosPersonal } from "./pages/staffLoans.js";
 import { renderDashboard } from "./pages/dashboard.js";
 import { renderUsuarios } from "./pages/users.js";
 import { renderMisMultas } from "./pages/myFines.js";
+import { renderReservas } from "./pages/reservas.js";
 
 const app = document.getElementById("app");
 const cabecera = h("div", { id: "cabecera" });
@@ -22,6 +23,7 @@ addRoute(/^\/$/, renderCatalogo);
 addRoute(/^\/libro\/([a-f0-9]{24})$/i, renderLibro);
 addRoute(/^\/mis-prestamos$/, renderMisPrestamos);
 addRoute(/^\/prestamos$/, renderPrestamosPersonal);
+addRoute(/^\/reservas$/, renderReservas);
 addRoute(/^\/dashboard$/, renderDashboard);
 addRoute(/^\/usuarios$/, renderUsuarios);
 addRoute(/^\/mis-multas$/, renderMisMultas);
