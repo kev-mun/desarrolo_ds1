@@ -31,3 +31,5 @@ addRoute(/^\/usuarios$/, renderUsuarios);
 addRoute(/^\/mis-multas$/, renderMisMultas);
 
 startRouter(contenido, () => cabecera.replaceChildren(renderHeader()));
+
+import "./styles/glass.css";

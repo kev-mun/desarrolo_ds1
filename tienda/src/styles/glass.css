@@ -1,0 +1,196 @@
+/* glass.css — rediseño glassmorphism (Stitch). Se importa DESPUÉS de main.css y fase-e.css.
+   Solo estilos: no cambia ninguna lógica ni estructura de las páginas. */
+
+:root {
+  --fondo: #070b14;
+  --panel: rgba(255, 255, 255, 0.06);
+  --borde: rgba(255, 255, 255, 0.13);
+  --texto: #eef1fb;
+  --suave: #a3acc9;
+  --acento: #8b5cf6;
+  --acento-2: #3b82f6;
+  --acento-texto: #ffffff;
+  --ok: #34d399;
+  --error: #fb7185;
+  --aviso: #fbbf24;
+
+  /* variables que usa fase-e.css con fallback claro */
+  --fondo-tarjeta: rgba(20, 24, 44, 0.78);
+  --texto-suave: #a3acc9;
+
+  --vidrio: rgba(255, 255, 255, 0.06);
+  --vidrio-fuerte: rgba(255, 255, 255, 0.10);
+  --vidrio-borde: rgba(255, 255, 255, 0.13);
+  --desenfoque: blur(18px) saturate(140%);
+  --sombra: 0 8px 32px rgba(0, 0, 0, 0.35);
+  --degradado: linear-gradient(135deg, #8b5cf6 0%, #3b82f6 100%);
+  --radio: 18px;
+}
+
+/* ---------- Fondo aurora ---------- */
+html { background: var(--fondo); }
+body {
+  min-height: 100vh;
+  background: transparent;
+  color: var(--texto);
+  font-family: "Inter", system-ui, sans-serif;
+}
+body::before {
+  content: "";
+  position: fixed; inset: 0; z-index: -1; pointer-events: none;
+  background:
+    radial-gradient(48rem 36rem at 12% -8%, rgba(139, 92, 246, 0.38), transparent 60%),
+    radial-gradient(44rem 34rem at 92% 6%, rgba(59, 130, 246, 0.30), transparent 60%),
+    radial-gradient(40rem 30rem at 50% 108%, rgba(20, 184, 166, 0.24), transparent 60%),
+    var(--fondo);
+}
+::selection { background: rgba(139, 92, 246, 0.45); }
+a { color: #a5b4fc; }
+a:hover { color: #c7d2fe; }
+.muted { color: var(--suave); }
+
+/* ---------- Cabecera y navegación ---------- */
+.cabecera {
+  position: sticky; top: 0; z-index: 40;
+  background: rgba(7, 11, 20, 0.55);
+  -webkit-backdrop-filter: var(--desenfoque); backdrop-filter: var(--desenfoque);
+  border-bottom: 1px solid var(--vidrio-borde);
+}
+.cabecera-in { gap: 1rem 1.5rem; }
+.marca {
+  font-weight: 700; letter-spacing: -0.01em;
+  background: var(--degradado); -webkit-background-clip: text; background-clip: text; color: transparent;
+}
+.nav {
+  gap: .25rem; padding: .25rem; flex: 0 1 auto;
+  background: var(--vidrio); border: 1px solid var(--vidrio-borde); border-radius: 999px;
+  overflow-x: auto; scrollbar-width: none;
+}
+.nav::-webkit-scrollbar { display: none; }
+.nav a { padding: .38rem .95rem; border-radius: 999px; font-size: .9rem; font-weight: 500; white-space: nowrap; color: var(--suave); transition: background .2s, color .2s; }
+.nav a:hover { background: var(--vidrio-fuerte); color: var(--texto); }
+.nav a.activo { background: var(--degradado); color: #fff; box-shadow: 0 4px 16px rgba(139, 92, 246, .4); }
+.usuario { color: var(--suave); }
+
+/* ---------- Botones ---------- */
+.btn {
+  background: var(--degradado); color: #fff; border-radius: 12px; padding: .6rem 1.1rem;
+  box-shadow: 0 6px 20px rgba(99, 102, 241, .35);
+  transition: transform .15s, box-shadow .2s, filter .2s;
+}
+.btn:hover { filter: brightness(1.1); transform: translateY(-1px); box-shadow: 0 10px 26px rgba(99, 102, 241, .45); }
+.btn:active { transform: translateY(0); }
+.btn:disabled { opacity: .5; transform: none; box-shadow: none; }
+.btn-sec {
+  background: var(--vidrio); color: var(--texto); border: 1px solid var(--vidrio-borde); box-shadow: none;
+  -webkit-backdrop-filter: var(--desenfoque); backdrop-filter: var(--desenfoque);
+}
+.btn-sec:hover { background: var(--vidrio-fuerte); box-shadow: none; }
+.btn:focus-visible, input:focus-visible, select:focus-visible, a:focus-visible, button:focus-visible {
+  outline: 2px solid #a5b4fc; outline-offset: 2px;
+}
+
+/* ---------- Formularios ---------- */
+input, select, textarea {
+  font: inherit; color: var(--texto);
+  background: rgba(255, 255, 255, 0.05); border: 1px solid var(--vidrio-borde); border-radius: 12px; padding: .65rem .85rem;
+  transition: border-color .2s, box-shadow .2s, background .2s;
+}
+input::placeholder, textarea::placeholder { color: rgba(163, 172, 201, .6); }
+input:focus, select:focus, textarea:focus {
+  outline: none; border-color: rgba(139, 92, 246, .8); background: rgba(255, 255, 255, .08);
+  box-shadow: 0 0 0 3px rgba(139, 92, 246, .25);
+}
+select option { background: #11152a; color: var(--texto); }
+.campo span { color: var(--suave); font-weight: 500; }
+
+/* ---------- Tarjetas / vidrio ---------- */
+.tarjeta, .libro, .kpi, .modal-caja, .toast {
+  background: var(--vidrio); border: 1px solid var(--vidrio-borde); border-radius: var(--radio);
+  -webkit-backdrop-filter: var(--desenfoque); backdrop-filter: var(--desenfoque);
+  box-shadow: var(--sombra);
+}
+.tarjeta { padding: 1.5rem; }
+.login { max-width: 430px; margin: 4rem auto; }
+.login h1 { margin-top: 0; }
+
+.alerta { background: rgba(244, 63, 94, .14); border: 1px solid rgba(244, 63, 94, .5); color: #fecdd3; border-radius: 12px; }
+.aviso { background: rgba(251, 191, 36, .12); border: 1px solid rgba(251, 191, 36, .45); color: #fde68a; border-radius: 12px; }
+
+/* ---------- Catálogo ---------- */
+.libro { transition: transform .2s, border-color .2s, background .2s; }
+.libro:hover { transform: translateY(-3px); background: var(--vidrio-fuerte); border-color: rgba(165, 180, 252, .45); }
+.portada { background: linear-gradient(145deg, #6d28d9, #2563eb 60%, #0d9488); box-shadow: 0 6px 18px rgba(0, 0, 0, .4); color: #fff; }
+.etiqueta { background: rgba(139, 92, 246, .2); color: #c4b5fd; border: 1px solid rgba(139, 92, 246, .35); }
+.disp.ok { color: var(--ok); }
+.disp.sin { color: var(--aviso); }
+.estado { color: var(--suave); }
+.estado.error { color: #fecdd3; }
+.paginacion { color: var(--suave); }
+
+/* ---------- Detalle de libro (sección) y modal (dl) ---------- */
+section.detalle { display: flex; gap: 1.5rem; flex-wrap: wrap; }
+dl.detalle { display: grid; grid-template-columns: max-content 1fr; gap: 6px 16px; margin: 12px 0; }
+.datos dt, dl.detalle dt { color: var(--suave); }
+
+/* ---------- Tablas ---------- */
+.tabla-caja, .tabla-wrap {
+  overflow-x: auto; background: var(--vidrio); border: 1px solid var(--vidrio-borde); border-radius: var(--radio);
+  -webkit-backdrop-filter: var(--desenfoque); backdrop-filter: var(--desenfoque); box-shadow: var(--sombra);
+}
+.tabla-wrap { margin-top: 1rem; }
+.tabla { background: transparent; border-radius: 0; }
+.tabla th, .tabla td { border-bottom: 1px solid rgba(255, 255, 255, .08); }
+.tabla th { color: var(--suave); background: rgba(255, 255, 255, .04); font-size: .75rem; letter-spacing: .06em; text-transform: uppercase; }
+.tabla tbody tr { transition: background .15s; }
+.tabla tbody tr:hover { background: rgba(255, 255, 255, .06); }
+.tabla tbody tr:last-child td { border-bottom: 0; }
+
+/* ---------- Badges y chips (estados) ---------- */
+.badge, .chip { border: 1px solid transparent; letter-spacing: .01em; background: rgba(255, 255, 255, .1); color: var(--texto); }
+.estado-disponible, .chip-devuelto, .chip-pagada, .chip-pagado, .chip-cumplida { background: rgba(52, 211, 153, .15); color: #6ee7b7; border-color: rgba(52, 211, 153, .35); }
+.estado-prestado, .chip-pendiente, .chip-en_espera { background: rgba(251, 191, 36, .15); color: #fcd34d; border-color: rgba(251, 191, 36, .35); }
+.estado-reservado, .chip-activo, .chip-lista { background: rgba(96, 165, 250, .16); color: #93c5fd; border-color: rgba(96, 165, 250, .38); }
+.estado-danado, .estado-extraviado, .estado-perdido, .chip-vencido, .chip-expirada, .chip-cancelada { background: rgba(251, 113, 133, .16); color: #fda4af; border-color: rgba(251, 113, 133, .38); }
+.estado-dado_de_baja { background: rgba(148, 163, 184, .16); color: #cbd5e1; border-color: rgba(148, 163, 184, .35); }
+
+/* ---------- Dashboard (KPI) ---------- */
+.kpi { padding: 1.1rem; gap: 4px; transition: transform .2s, border-color .2s; }
+.kpi:hover { transform: translateY(-2px); border-color: rgba(165, 180, 252, .45); }
+.kpi-valor { font-size: 1.9rem; letter-spacing: -.02em; background: var(--degradado); -webkit-background-clip: text; background-clip: text; color: transparent; }
+.kpi-texto { color: var(--suave); }
+.panel h2 { margin-bottom: 4px; }
+
+/* ---------- Doble clic y modal ---------- */
+.doble-clic:hover { background: rgba(255, 255, 255, .07); }
+.doble-clic:focus-visible { outline: 2px solid #a5b4fc; outline-offset: -2px; }
+.modal-fondo { background: rgba(4, 6, 14, .6); -webkit-backdrop-filter: blur(6px); backdrop-filter: blur(6px); }
+.modal-caja { background: rgba(18, 22, 42, .82); box-shadow: 0 20px 60px rgba(0, 0, 0, .55); }
+.modal-cab { background: rgba(255, 255, 255, .04); border-bottom: 1px solid var(--vidrio-borde); border-radius: var(--radio) var(--radio) 0 0; }
+.modal-cerrar { color: var(--suave); border-radius: 8px; transition: background .15s, color .15s; }
+.modal-cerrar:hover { background: var(--vidrio-fuerte); color: var(--texto); }
+
+/* ---------- Avisos (toast) ---------- */
+.toast { border-left: 4px solid #a5b4fc; border-radius: 14px; background: rgba(18, 22, 42, .85); color: var(--texto); }
+.toast.ok { border-left-color: var(--ok); }
+.toast.error { border-left-color: var(--error); }
+
+/* ---------- Responsive ---------- */
+@media (max-width: 720px) {
+  .cabecera-in { gap: .6rem; }
+  .nav { order: 3; width: 100%; }
+  .sesion { margin-left: auto; }
+  .login { margin: 2rem auto; }
+}
+
+/* Sin soporte de desenfoque: más opacidad para que el texto siga legible */
+@supports not ((backdrop-filter: blur(1px)) or (-webkit-backdrop-filter: blur(1px))) {
+  .cabecera { background: rgba(7, 11, 20, .94); }
+  .tarjeta, .libro, .kpi, .tabla-caja, .tabla-wrap, .toast { background: rgba(24, 28, 52, .92); }
+  .modal-caja { background: rgba(18, 22, 42, .98); }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  * { transition: none !important; }
+  .libro:hover, .kpi:hover, .btn:hover { transform: none; }
+}
