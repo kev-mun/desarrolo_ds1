@@ -5,6 +5,7 @@ const Usuario = require("../models/Usuario");
 const Multa = require("../models/Multa");
 const { diasHabilesAtraso, calcularMonto } = require("../utils/multas");
 const { actualizarEstadosSiToca } = require("../utils/estados");
+const { PLAZO_DIAS, MAX_RENOVACIONES, reservasEnEspera } = require("../utils/reglas");
 const { z } = require("zod");
 
 const prestamoCreateSchema = z.object({
@@ -124,9 +125,9 @@ const createPrestamo = async (req, res, next) => {
       });
     }
 
-    // 5. Plazo provisional de 7 días
+    // 5. Plazo del préstamo
     const fechaPrestamo = new Date();
-    const fechaVencEsperada = new Date(Date.now() + 7 * 24 * 60 * 60 * 1000);
+    const fechaVencEsperada = new Date(Date.now() + PLAZO_DIAS * 24 * 60 * 60 * 1000);
 
     const nuevoPrestamo = await Prestamo.create({
       ejemplar: ejemplarId,
@@ -192,8 +193,71 @@ const devolverPrestamo = async (req, res, next) => {
   }
 };
 
+/**
+ * Renovar un préstamo: extiende la fecha límite PLAZO_DIAS días, hasta MAX_RENOVACIONES veces.
+ * POST /api/prestamos/:id/renovar  (el dueño o el personal)
+ */
+const renovarPrestamo = async (req, res, next) => {
+  try {
+    const { id } = req.params;
+    if (!mongoose.isValidObjectId(id)) {
+      return res.status(400).json({ message: "ID de préstamo inválido" });
+    }
+
+    const actual = await Prestamo.findById(id);
+    if (!actual) {
+      return res.status(404).json({ message: "Préstamo no encontrado" });
+    }
+
+    const esLector = req.usuario.rol === "estudiante" || req.usuario.rol === "profesor";
+    if (esLector && String(actual.usuario) !== String(req.usuario._id)) {
+      return res.status(403).json({ message: "No puede renovar el préstamo de otro usuario" });
+    }
+
+    if (await Multa.exists({ usuario: actual.usuario, estado: "pendiente" })) {
+      return res.status(403).json({ message: "El usuario tiene una multa pendiente. Debe pagarla para renovar" });
+    }
+
+    if ((await reservasEnEspera(actual.ejemplar)) > 0) {
+      return res.status(409).json({ message: "No se puede renovar: otro usuario tiene una reserva en espera" });
+    }
+
+    const ahora = new Date();
+    const nuevaFecha = new Date(actual.fechaVencEsperada.getTime() + PLAZO_DIAS * 24 * 60 * 60 * 1000);
+
+    // Atómico: solo renueva si sigue activo, no está vencido y no alcanzó el límite
+    const prestamo = await Prestamo.findOneAndUpdate(
+      {
+        _id: id,
+        estado: "activo",
+        fechaVencEsperada: { $gt: ahora },
+        $expr: { $lt: [{ $size: "$renovaciones" }, MAX_RENOVACIONES] }
+      },
+      {
+        $set: { fechaVencEsperada: nuevaFecha },
+        $push: { renovaciones: { fecha: ahora, nuevaFechaVenc: nuevaFecha, renovadoPor: req.usuario._id } }
+      },
+      { returnDocument: "after" }
+    );
+
+    if (!prestamo) {
+      const ahoraDoc = await Prestamo.findById(id);
+      let motivo = "El préstamo no se puede renovar";
+      if (ahoraDoc.estado === "devuelto") motivo = "El préstamo ya fue devuelto";
+      else if (ahoraDoc.estado === "vencido" || ahoraDoc.fechaVencEsperada <= ahora) motivo = "El préstamo está vencido: devuelva el ejemplar";
+      else if (ahoraDoc.renovaciones.length >= MAX_RENOVACIONES) motivo = `Alcanzó el máximo de ${MAX_RENOVACIONES} renovaciones`;
+      return res.status(409).json({ message: motivo });
+    }
+
+    res.json(prestamo);
+  } catch (error) {
+    next(error);
+  }
+};
+
 module.exports = {
   getPrestamos,
   createPrestamo,
-  devolverPrestamo
+  devolverPrestamo,
+  renovarPrestamo
 };

@@ -11,6 +11,11 @@ const renovacionSchema = new mongoose.Schema(
     nuevaFechaVenc: {
       type: Date,
       required: true
+    },
+    renovadoPor: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "Usuario",
+      default: null
     }
   },
   { _id: false }

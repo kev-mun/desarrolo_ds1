@@ -3,14 +3,14 @@ const router = express.Router();
 const {
   getPrestamos,
   createPrestamo,
-  devolverPrestamo
+  devolverPrestamo,
+  renovarPrestamo
 } = require("../controllers/prestamoController");
 const { requireAuth } = require("../middleware/auth");
 
-// Solo el personal de la biblioteca puede registrar devoluciones
 const soloPersonal = (req, res, next) => {
-  if (["admin", "bibliotecario"].includes(req.usuario.rol)) return next();
-  return res.status(403).json({ message: "No tiene permisos para realizar esta acción" });
+  if (req.usuario.rol === "admin" || req.usuario.rol === "bibliotecario") return next();
+  return res.status(403).json({ message: "No tiene permisos para esta operación" });
 };
 
 router.use(requireAuth);
@@ -18,5 +18,6 @@ router.use(requireAuth);
 router.get("/", getPrestamos);
 router.post("/", createPrestamo);
 router.patch("/:id/devolver", soloPersonal, devolverPrestamo);
+router.post("/:id/renovar", renovarPrestamo);
 
 module.exports = router;
