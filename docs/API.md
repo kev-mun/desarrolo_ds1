@@ -12,6 +12,8 @@ Authorization: Bearer <token>
 
 El token se obtiene en el login y dura 8 horas.
 
+Las credenciales de las cuentas de demostración se entregan por separado; no se publican en el repositorio.
+
 ## Formato de respuestas
 
 Listados paginados:
@@ -85,7 +87,7 @@ Otros errores:
 ### POST /auth/login
 
 ```json
-{ "correo": "admin@biblioteca.com", "password": "Admin12345" }
+{ "correo": "admin@biblioteca.com", "password": "<CONTRASEÑA>" }
 ```
 
 Respuesta 200:
@@ -114,7 +116,7 @@ Errores: 400 (campos faltantes, con `errores`), 401 (credenciales inválidas), 4
   "nombre": "Ana Pérez",
   "documento": "10000010",
   "correo": "ana@biblioteca.com",
-  "password": "Clave12345",
+  "password": "<CONTRASEÑA>",
   "rol": "estudiante"
 }
 ```

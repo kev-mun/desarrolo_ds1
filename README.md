@@ -84,7 +84,7 @@ Se ejecutan desde `chat-server/`.
 
 `npm run seed` crea usuarios de cada rol, colecciones, 12 libros y sus ejemplares, e imprime la tabla de credenciales de prueba en la consola.
 
-Pide las credenciales de demostración a los autores.
+Las credenciales de las cuentas de demostración se entregan por separado; no se publican en el repositorio.
 
 ## Uso rápido
 
@@ -94,7 +94,7 @@ Pide las credenciales de demostración a los autores.
 ```bash
 curl -X POST http://localhost:8080/api/auth/login \
   -H "Content-Type: application/json" \
-  -d '{"correo":"admin@biblioteca.com","password":"TU_PASSWORD"}'
+  -d '{"correo":"admin@biblioteca.com","password":"<CONTRASEÑA>"}'
 ```
 
 3. Usa el `token` recibido en las demás peticiones:

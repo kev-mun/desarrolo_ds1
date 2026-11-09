@@ -1,14 +1,36 @@
 // scripts/smoke-test.js
 // Prueba de humo de la API. Requiere la API corriendo: npm run dev
 // Uso: npm run smoke
-// Variables opcionales: BASE_URL, ESTUDIANTE_CORREO, ESTUDIANTE_PASSWORD
+// Variables obligatorias: SMOKE_ADMIN_CORREO, SMOKE_ADMIN_PASSWORD, SMOKE_ESTUDIANTE_CORREO, SMOKE_ESTUDIANTE_PASSWORD
+// Variables opcionales: BASE_URL, SMOKE_TEST_PASSWORD
 
 const BASE_URL = process.env.BASE_URL || "http://localhost:8080/api";
-const ADMIN = { correo: "admin@biblioteca.com", password: "Admin12345" };
-const ESTUDIANTE = {
-  correo: process.env.ESTUDIANTE_CORREO || "estudiante@biblioteca.com",
-  password: process.env.ESTUDIANTE_PASSWORD || "Est12345",
-};
+
+const ADMIN_CORREO = process.env.SMOKE_ADMIN_CORREO;
+const ADMIN_PASSWORD = process.env.SMOKE_ADMIN_PASSWORD;
+const ESTUDIANTE_CORREO = process.env.SMOKE_ESTUDIANTE_CORREO || process.env.ESTUDIANTE_CORREO;
+const ESTUDIANTE_PASSWORD = process.env.SMOKE_ESTUDIANTE_PASSWORD || process.env.ESTUDIANTE_PASSWORD;
+
+if (!ADMIN_CORREO) {
+  console.error("❌ Falta la variable de entorno obligatoria: SMOKE_ADMIN_CORREO");
+  process.exit(1);
+}
+if (!ADMIN_PASSWORD) {
+  console.error("❌ Falta la variable de entorno obligatoria: SMOKE_ADMIN_PASSWORD");
+  process.exit(1);
+}
+if (!ESTUDIANTE_CORREO) {
+  console.error("❌ Falta la variable de entorno obligatoria: SMOKE_ESTUDIANTE_CORREO");
+  process.exit(1);
+}
+if (!ESTUDIANTE_PASSWORD) {
+  console.error("❌ Falta la variable de entorno obligatoria: SMOKE_ESTUDIANTE_PASSWORD");
+  process.exit(1);
+}
+
+const ADMIN = { correo: ADMIN_CORREO, password: ADMIN_PASSWORD };
+const ESTUDIANTE = { correo: ESTUDIANTE_CORREO, password: ESTUDIANTE_PASSWORD };
+const PASSWORD_PRUEBA = process.env.SMOKE_TEST_PASSWORD || "TestTemporal#2026";
 
 let ok = 0;
 let fail = 0;
@@ -84,11 +106,11 @@ const lista = (data) => (Array.isArray(data) ? data : (data && data.data) || [])
   if (est.token) {
     const r = await api("POST", "/usuarios", {
       token: est.token,
-      body: { nombre: "X", documento: `D${sufijo}`, correo: `x${sufijo}@t.com`, password: "Clave12345", rol: "estudiante" },
+      body: { nombre: "X", documento: `D${sufijo}`, correo: `x${sufijo}@t.com`, password: PASSWORD_PRUEBA, rol: "estudiante" },
     });
     check("Estudiante creando usuario: 403", r.status === 403, `status ${r.status}`);
   } else {
-    console.log(`⚠️  No se pudo iniciar sesión como estudiante (${ESTUDIANTE.correo}). Define ESTUDIANTE_CORREO y ESTUDIANTE_PASSWORD con los datos del seed.`);
+    console.log(`⚠️  No se pudo iniciar sesión como estudiante (${ESTUDIANTE.correo}). Define SMOKE_ESTUDIANTE_CORREO y SMOKE_ESTUDIANTE_PASSWORD con los datos correspondientes.`);
   }
 
   // 3. Usuarios
@@ -96,7 +118,7 @@ const lista = (data) => (Array.isArray(data) ? data : (data && data.data) || [])
     nombre: "Usuario Smoke",
     documento: `SMK${sufijo}`,
     correo: `smoke${sufijo}@biblioteca.com`,
-    password: "Clave12345",
+    password: PASSWORD_PRUEBA,
     rol: "estudiante",
   };
   const crear = await api("POST", "/usuarios", { token: admin.token, body: nuevo });
